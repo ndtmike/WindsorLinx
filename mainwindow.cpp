@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ConnectMenu();
     LoadDisplay();
+    saveFileName = "";
 }
 
 MainWindow::~MainWindow()
@@ -24,14 +25,14 @@ void MainWindow::LoadDisplay()
 
 void MainWindow::ConnectMenu()
 {
-    connect(ui->action_Open, SIGNAL(triggered()), this , SLOT(FileOpen()));
-    connect(ui->action_Save, SIGNAL(triggered()), this , SLOT(FileSave()));
-    connect(ui->action_Save_As, SIGNAL(triggered()), this , SLOT(FileSaveAs()));
-    connect(ui->action_Quit, SIGNAL(triggered()), this , SLOT(FileQuit()));
-    connect(ui->action_Copy, SIGNAL(triggered()), this , SLOT(EditCopy()));
-    connect(ui->action_Connect, SIGNAL(triggered()), this , SLOT(ToolConnect()));
-    connect(ui->action_Help, SIGNAL(triggered()), this , SLOT(HelpContents()));
-    connect(ui->action_About, SIGNAL(triggered()), this , SLOT(HelpAbout()));
+    connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(FileOpen()));
+    connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(FileSave()));
+    connect(ui->action_Save_As, SIGNAL(triggered()), this, SLOT(FileSaveAs()));
+    connect(ui->action_Quit, SIGNAL(triggered()), this, SLOT(FileQuit()));
+    connect(ui->action_Copy, SIGNAL(triggered()), this, SLOT(EditCopy()));
+    connect(ui->action_Connect, SIGNAL(triggered()), this, SLOT(ToolConnect()));
+    connect(ui->action_Help, SIGNAL(triggered()), this, SLOT(HelpContents()));
+    connect(ui->action_About, SIGNAL(triggered()), this, SLOT(HelpAbout()));
 }
 
 void MainWindow::FileOpen()
@@ -43,15 +44,13 @@ void MainWindow::FileOpen()
     QString fileName = "";
     fileName = QFileDialog::getOpenFileName(this,
         tr("Open Text File"), "", tr("Text FIles (*.txt)"));
-//    saveFileName = fileName;
+    saveFileName = fileName;
     QFile file(fileName);
     QTextStream load(&file);
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-    Display->setPlainText("");
     file.open(QFile::ReadOnly | QFile::Text);
-    QTextStream ReadFile(&file);
     Display->setPlainText(load.readAll());
 #ifndef QT_NO_CURSOR
     QApplication::restoreOverrideCursor();
@@ -64,6 +63,11 @@ void MainWindow::FileSave()
 #ifdef MENU_TEST
     QMessageBox::information( this,"FileSave", "File Save OK!");
 #endif
+    if(saveFileName != ""){
+        SaveFile(saveFileName);
+    }else{
+        FileSaveAs(); //might need to put a test here for a cancel
+    }
 }
 
 bool MainWindow::FileSaveAs()
@@ -88,6 +92,7 @@ void MainWindow::FileQuit()
 #ifdef MENU_TEST
     QMessageBox::information( this,"FileQuit", "File Quit OK!");
 #endif
+    close();
 }
 
 void MainWindow::EditCopy()
@@ -138,7 +143,7 @@ bool MainWindow::SaveFile(const QString &fileName)
     QApplication::restoreOverrideCursor();
 #endif
 
-//    setCurrentFile(fileName);
+    saveFileName = fileName;
     statusBar()->showMessage(tr("File saved"), 2000);
     return true;
 }

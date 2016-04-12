@@ -41,6 +41,8 @@ private:
     void LoadDisplay();
     bool SaveFile(const QString& fileName);
     QTextEdit* Display;
+
+    QString saveFileName;
 };
 
 #endif // MAINWINDOW_H
