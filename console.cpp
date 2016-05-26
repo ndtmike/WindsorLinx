@@ -36,22 +36,73 @@
 ** support, and with no warranty, express or implied, as to its usefulness for
 ** any purpose.
 **
-** File Name: main.cpp
+** File Name: console.cpp
 **
-** main.cpp - windsorlinx software
+** console.cpp - windsorlinx software
 **
 ** Author: Michael W. Hoag
 ** Copyright Michael W. Hoag 2016
 ** Email: mike@ndtjames.com
 ** -------------------------------------------------------------------------*/
-#include <QApplication>
 
-#include "mainwindow.h"
+#include "console.h"
 
-int main(int argc, char *argv[])
+#include <QScrollBar>
+
+#include <QtCore/QDebug>
+
+Console::Console(QWidget *parent)
+    : QPlainTextEdit(parent)
+    , localEchoEnabled(false)
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
+    QPalette p = palette();
+    p.setColor(QPalette::Base, Qt::black);
+    p.setColor(QPalette::Text, Qt::green);
+    setPalette(p);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
+}
+
+void Console::putData(const QByteArray &data)
+{    
+    insertPlainText(QString(data));
+
+    QScrollBar *bar = verticalScrollBar();
+    bar->setValue(bar->maximum());
+}
+
+void Console::setLocalEchoEnabled(bool set)
+{
+    localEchoEnabled = set;
+}
+
+void Console::keyPressEvent(QKeyEvent *e)
+{
+    switch (e->key()) {
+    case Qt::Key_Backspace:
+    case Qt::Key_Left:
+    case Qt::Key_Right:
+    case Qt::Key_Up:
+    case Qt::Key_Down:
+        break;
+    default:
+        if (localEchoEnabled)
+            QPlainTextEdit::keyPressEvent(e);
+        emit getData(e->text().toLocal8Bit());
+    }
+}
+
+void Console::mousePressEvent(QMouseEvent *e)
+{
+    Q_UNUSED(e)
+    setFocus();
+}
+
+void Console::mouseDoubleClickEvent(QMouseEvent *e)
+{
+    Q_UNUSED(e)
+}
+
+void Console::contextMenuEvent(QContextMenuEvent *e)
+{
+    Q_UNUSED(e)
 }

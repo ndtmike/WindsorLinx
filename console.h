@@ -36,22 +36,44 @@
 ** support, and with no warranty, express or implied, as to its usefulness for
 ** any purpose.
 **
-** File Name: main.cpp
+** File Name: console.h
 **
-** main.cpp - windsorlinx software
+** Header file for console.cpp - windsorlinx software
 **
 ** Author: Michael W. Hoag
 ** Copyright Michael W. Hoag 2016
 ** Email: mike@ndtjames.com
 ** -------------------------------------------------------------------------*/
-#include <QApplication>
+#ifndef CONSOLE_H
+#define CONSOLE_H
 
-#include "mainwindow.h"
+#include <QPlainTextEdit>
+#include <QAbstractScrollArea>
 
-int main(int argc, char *argv[])
+class Console : public QPlainTextEdit
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-    return a.exec();
-}
+    Q_OBJECT
+
+signals:
+    void getData(const QByteArray &data);
+
+public:
+    explicit Console(QWidget *parent = 0);
+
+    void putData(const QByteArray &data);
+
+
+    void setLocalEchoEnabled(bool set);
+
+protected:
+    virtual void keyPressEvent(QKeyEvent *e);
+    virtual void mousePressEvent(QMouseEvent *e);
+    virtual void mouseDoubleClickEvent(QMouseEvent *e);
+    virtual void contextMenuEvent(QContextMenuEvent *e);
+
+private:
+    bool localEchoEnabled;
+
+};
+
+#endif // CONSOLE_H

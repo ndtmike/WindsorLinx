@@ -1,20 +1,81 @@
+/****************************************************************************
+**
+** Copyright (C) 2012 Denis Shienkov <denis.shienkov@gmail.com>
+** Copyright (C) 2012 Laszlo Papp <lpapp@kde.org>
+** Contact: http://www.qt.io/licensing/
+**
+** This file is part of the QtSerialPort module of the Qt Toolkit.
+**
+** $QT_BEGIN_LICENSE:LGPL21$
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see http://www.qt.io/terms-conditions. For further
+** information use the contact form at http://www.qt.io/contact-us.
+**
+** GNU Lesser General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU Lesser
+** General Public License version 2.1 or version 3 as published by the Free
+** Software Foundation and appearing in the file LICENSE.LGPLv21 and
+** LICENSE.LGPLv3 included in the packaging of this file. Please review the
+** following information to ensure the GNU Lesser General Public License
+** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
+** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+**
+** As a special exception, The Qt Company gives you certain additional
+** rights. These rights are described in The Qt Company LGPL Exception
+** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+**
+** $QT_END_LICENSE$
+**
+****************************************************************************/
+/* ---------------------------------------------------------------------------
+** This software is furnished "as is", without technical
+** support, and with no warranty, express or implied, as to its usefulness for
+** any purpose.
+**
+** File Name: mainwindow.h
+**
+** Header file for mainwindow.h - windsorlinx software
+**
+** Author: Michael W. Hoag
+** Copyright Michael W. Hoag 2016
+** Email: mike@ndtjames.com
+** -------------------------------------------------------------------------*/
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QtCore/QtGlobal>
+#include <QIODevice>
 #include <QMainWindow>
-#include <QtCore>
-#include <QtGlobal>
+#include <QTextStream>
 #include <QMessageBox>
-#include <QtWidgets>
-#include <QTextEdit>
+#include <QFileDialog>
+#include <QtSerialPort/QSerialPort>
+#include <QSerialPortInfo>
+#include <QTimer>
+#include <QList>
+#include <QProcess>
 
-#ifdef QT_DEBUG
-    #define MENU_TEST
-#endif
+#include "console.h"
+#include "splash.h"
+#include "parser.h"
+
+#define TEST_REG
+
+
+QT_BEGIN_NAMESPACE
 
 namespace Ui {
 class MainWindow;
 }
+
+QT_END_NAMESPACE
+
+class Console;
+//class MoistureDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -23,26 +84,48 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+//    bool saveFileSwitch;
+    QString saveFileName;
+
+protected:
 
 private slots:
-    void FileOpen();
-    void FileSave();
-    bool FileSaveAs();
-    void FileQuit();
-    void EditCopy();
-    void ToolConnect();
-    void HelpContents();
-    void HelpAbout();
-
+    void openSerialPort();
+    void closeSerialPort();
+    void processSerialPort();
+    void about();
+    void help();
+    void writeData(const QByteArray &data);
+    void readData();
+    void cleanData();
+    void handleError(QSerialPort::SerialPortError error);
+    void showSplash();
+    void endUpload();
+    bool saveAs();
+    void copy();
+    void save();
+    void openFile();
+    void sendConnect();
+#ifdef QT_DEBUG
+    void loadExampleFile();
+#endif
 private:
+    QTimer* connectTimer;
+    void initActionsConnections();
+    bool checkSerialPort();
+    void loadTemp();
+    bool foundSerialPort;
+    bool saveFile(const QString &fileName);
     Ui::MainWindow *ui;
+    Console *console;
+    QSerialPort *serial;
+    QTimer *serialTimeOut;
 
-    void ConnectMenu();
-    void LoadDisplay();
-    bool SaveFile(const QString& fileName);
-    QTextEdit* Display;
-
-    QString saveFileName;
+    static const QString rdFile(void){ return("rd.txt"); };    
+    static const QString tFile(void){ return("temp.txt");};
+    static const QString helpString(void){ return("hh.exe aggralinx.chm");};
+#ifdef  QT_DEBUG
+    static const QString exampleFile(void){ return("AG_Sample_Data.txt"); };
+#endif
 };
-
 #endif // MAINWINDOW_H
