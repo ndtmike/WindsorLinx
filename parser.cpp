@@ -15,7 +15,7 @@
 
 #include "parser.h"
 #include "datapacket.h"
-
+/*
 Parser::Parser()
 {
     QString df = QFileDialog::getOpenFileName(this); //not sure if this working?
@@ -28,32 +28,12 @@ Parser::Parser()
         return;
     }
 }
-
-Parser::Parser( const QString &df )
+*/
+Parser::Parser( const QString &in )
 {
-    dataFile = df;
-    outputFile = tFile();
-    eraseTempFile();
-    if(!readInputData()){ //check that string passed is valid
-        return;
-    }
-    if(!writeOutputData()){ //check that string passed is valid
-        return;
-    }
+    QString copy = in;
 
-}
 
-Parser::Parser( const QString &df, const QString &of )
-{
-    dataFile = df;
-    outputFile = of;
-    eraseTempFile();
-    if(!readInputData()){ //check that string passed is valid
-        return;
-    }
-    if(!writeOutputData()){ //check that string passed is valid
-        return;
-    }
 }
 
 Parser::~Parser()
@@ -149,4 +129,29 @@ QString Parser::cleanLine(QString& line)
 //    QMessageBox::information(this, "eraseTempFile", working);
 #endif
     return(line);
+}
+
+Dataset::Dataset(const QString &in){
+    InputData = in;
+
+    Dist.resize(3);
+    Pres.resize(3);
+}
+
+Dataset::avgDist(){
+
+    int a;
+
+    a = (Dist[0]+Dist[1]+Dist[2])/3;
+
+    return(a);
+}
+
+Dataset::avgPres(){
+
+    int a;
+
+    a = (Pres[0]+Pres[1]+Pres[2])/3;
+
+    return(a);
 }

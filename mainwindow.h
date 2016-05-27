@@ -75,7 +75,6 @@ class MainWindow;
 QT_END_NAMESPACE
 
 class Console;
-//class MoistureDialog;
 
 class MainWindow : public QMainWindow
 {
@@ -84,7 +83,6 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
-//    bool saveFileSwitch;
     QString saveFileName;
 
 protected:
@@ -113,7 +111,7 @@ private:
     QTimer* connectTimer;
     void initActionsConnections();
     bool checkSerialPort();
-    void loadTemp();
+//    void loadTemp();
     bool foundSerialPort;
     bool saveFile(const QString &fileName);
     Ui::MainWindow *ui;
@@ -121,8 +119,8 @@ private:
     QSerialPort *serial;
     QTimer *serialTimeOut;
 
-    static const QString rdFile(void){ return("rd.txt"); };    
-    static const QString tFile(void){ return("temp.txt");};
+//    static const QString rdFile(void){ return("rd.txt"); };
+//    static const QString tFile(void){ return("temp.txt");};
     static const QString helpString(void){ return("hh.exe aggralinx.chm");};
 #ifdef  QT_DEBUG
     static const QString exampleFile(void){ return("AG_Sample_Data.txt"); };

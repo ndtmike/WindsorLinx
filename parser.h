@@ -23,6 +23,7 @@
 #include <QFileDialog>
 #include <QDateTime>
 #include <QVector>
+#include <QtCore>
 
 #include "mainwindow.h"
 #include "datapacket.h"
@@ -30,9 +31,8 @@
 class Parser : public QMainWindow
 {
 public:
-    Parser();
-    Parser( const QString &df ) ;
-    Parser( const QString &df, const QString &of);
+//    Parser();
+    Parser( const QString &in ) ;
     ~Parser();
 
 private:
@@ -47,6 +47,28 @@ private:
     static const QString tFile(void){ return("temp.txt");};
      static qint64 maxLineLength(void){ return(35);};
      static qint64 minLineLength(void){ return(24);};
+};
+
+class Dataset
+{
+public:
+    Dataset(const QString &in);
+
+    static int Data_Set_Size;
+    QString InputData;
+    int Day;
+    int Month;
+    int Year;
+    int Hour;
+    int Minute;
+
+    int Adc;
+
+    QVector <int> Dist;
+    QVector <int> Pres;
+
+    int avgDist(void);
+    int avgPres(void);
 };
 
 #endif // PARSER_H

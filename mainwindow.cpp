@@ -152,18 +152,18 @@ void MainWindow::writeData(const QByteArray &data)
 
 void MainWindow::readData()
 {
-    QFile file(rdFile());
-    QTextStream out(&file);
+//    QFile file(rdFile());
+//    QTextStream out(&file);
     connectTimer->stop();
     serialTimeOut->start(500);
     QByteArray data = serial->readAll();
     console->putData(data);
-    if(!file.open(QIODevice::Append)){
-        QMessageBox::information(this, "readData", tr("Cannot write rd.txt"));
-    }else{
-        out<<data;
-    }
-    file.close();
+//    if(!file.open(QIODevice::Append)){
+//        QMessageBox::information(this, "readData", tr("Cannot write rd.txt"));
+//    }else{
+//        out<<data;
+//    }
+//    file.close();
 }
 
 void MainWindow::handleError(QSerialPort::SerialPortError error)
@@ -193,8 +193,8 @@ void MainWindow::initActionsConnections()
 
 void MainWindow::cleanData()
 {
-/*    Parser* p = new Parser(rdFile(), tFile());
-    delete p;*/
+    Parser* p = new Parser(console->toPlainText());
+    delete p;
 }
 
 void MainWindow::processSerialPort()
@@ -272,14 +272,14 @@ void MainWindow::loadExampleFile()
     QApplication::restoreOverrideCursor();
 #endif
     file.close();
-    saveFile(rdFile());
+//    saveFile(rdFile());
     serialTimeOut->start(500);
 }
 #endif
-
+/*
 void MainWindow::loadTemp()
 {
-    QFile file(tFile());
+//    QFile file(tFile());
     QTextStream load(&file);
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
@@ -293,18 +293,18 @@ void MainWindow::loadTemp()
 #endif
     file.close();
 }
-
+*/
 void MainWindow::endUpload()
 {
-    const QString outputfile = tFile();
-    QFile file(outputfile);
-
     serialTimeOut->stop();
     QMessageBox::information(this, "endUpload", tr("Upload Complete"));
 #ifndef QT_NO_CURSOR
     QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
     cleanData();
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
     ui->action_Save->setEnabled(true);
     ui->actionSaveAs->setEnabled(true);
     ui->action_Open->setEnabled(false);
