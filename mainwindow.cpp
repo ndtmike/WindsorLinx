@@ -152,18 +152,10 @@ void MainWindow::writeData(const QByteArray &data)
 
 void MainWindow::readData()
 {
-//    QFile file(rdFile());
-//    QTextStream out(&file);
     connectTimer->stop();
     serialTimeOut->start(500);
-    QByteArray data = serial->readAll();
-    console->putData(data);
-//    if(!file.open(QIODevice::Append)){
-//        QMessageBox::information(this, "readData", tr("Cannot write rd.txt"));
-//    }else{
-//        out<<data;
-//    }
-//    file.close();
+    Data += serial->readAll();
+    console->putData(serial->readAll());
 }
 
 void MainWindow::handleError(QSerialPort::SerialPortError error)
@@ -189,12 +181,14 @@ void MainWindow::initActionsConnections()
     connect(ui->actionHelp, SIGNAL(triggered()), this, SLOT(help()));
     connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(openFile()));
+    connect(ui->actionPlot, SIGNAL(triggered()), this, SLOT(cleanData()));
 }
 
 void MainWindow::cleanData()
 {
-    Parser* p = new Parser(console->toPlainText());
+    Parser* p = new Parser( this, Data);
     delete p;
+    console->putData("");
 }
 
 void MainWindow::processSerialPort()
@@ -276,24 +270,7 @@ void MainWindow::loadExampleFile()
     serialTimeOut->start(500);
 }
 #endif
-/*
-void MainWindow::loadTemp()
-{
-//    QFile file(tFile());
-    QTextStream load(&file);
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
-    console->setPlainText("");
-    file.open(QFile::ReadOnly | QFile::Text);
-    QTextStream ReadFile(&file);
-    console->setPlainText(load.readAll());
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-    file.close();
-}
-*/
+
 void MainWindow::endUpload()
 {
     serialTimeOut->stop();

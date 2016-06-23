@@ -2,25 +2,34 @@
 <ui version="4.0">
  <class>MainWindow</class>
  <widget class="QMainWindow" name="MainWindow">
+  <property name="windowModality">
+   <enum>Qt::WindowModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>600</width>
+    <height>450</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Windsorlinx</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <property name="windowIcon">
+   <iconset>
+    <normaloff>../Icon/ndt_agg1.ico</normaloff>../Icon/ndt_agg1.ico</iconset>
+  </property>
+  <widget class="QWidget" name="centralWidget">
+   <layout class="QVBoxLayout" name="verticalLayout"/>
+  </widget>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>400</width>
-     <height>21</height>
+     <width>600</width>
+     <height>26</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -29,32 +38,33 @@
     </property>
     <addaction name="action_Open"/>
     <addaction name="action_Save"/>
-    <addaction name="action_Save_As"/>
-    <addaction name="action_Quit"/>
+    <addaction name="actionSaveAs"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="actionHelp"/>
+    <addaction name="actionAbout"/>
    </widget>
    <widget class="QMenu" name="menu_Edit">
     <property name="title">
      <string>&amp;Edit</string>
     </property>
-    <addaction name="action_Copy"/>
+    <addaction name="actionCopy"/>
    </widget>
-   <widget class="QMenu" name="menu_Tools">
+   <widget class="QMenu" name="menuTools">
     <property name="title">
      <string>&amp;Tools</string>
     </property>
-    <addaction name="action_Connect"/>
-   </widget>
-   <widget class="QMenu" name="menu_Help">
-    <property name="title">
-     <string>&amp;Help</string>
-    </property>
-    <addaction name="action_Help"/>
-    <addaction name="action_About"/>
+    <addaction name="actionPlot"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menu_Edit"/>
-   <addaction name="menu_Tools"/>
-   <addaction name="menu_Help"/>
+   <addaction name="menuTools"/>
+   <addaction name="menuHelp"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -63,11 +73,25 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
+   <addaction name="actionSaveAs"/>
+   <addaction name="separator"/>
+   <addaction name="actionCopy"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="action_Quit">
+  <action name="actionAbout">
+   <property name="text">
+    <string>&amp;About</string>
+   </property>
+   <property name="toolTip">
+    <string>About program</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+A</string>
+   </property>
+  </action>
+  <action name="actionQuit">
    <property name="icon">
-    <iconset resource="windsorlinx.qrc">
+    <iconset resource="terminal.qrc">
      <normaloff>:/images/application-exit.png</normaloff>:/images/application-exit.png</iconset>
    </property>
    <property name="text">
@@ -77,11 +101,42 @@
     <string>Ctrl+Q</string>
    </property>
   </action>
-  <action name="action_Save">
+  <action name="actionCopy">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="icon">
-    <iconset resource="windsorlinx.qrc">
+    <iconset resource="terminal.qrc">
+     <normaloff>:/images/editcopy.png</normaloff>:/images/editcopy.png</iconset>
+   </property>
+   <property name="text">
+    <string>Copy</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+C</string>
+   </property>
+  </action>
+  <action name="actionSaveAs">
+   <property name="icon">
+    <iconset resource="terminal.qrc">
      <normaloff>:/images/filesave.png</normaloff>:/images/filesave.png</iconset>
    </property>
+   <property name="text">
+    <string>Save &amp;As </string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+S</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="shortcut">
+    <string>F1</string>
+   </property>
+  </action>
+  <action name="action_Save">
    <property name="text">
     <string>&amp;Save</string>
    </property>
@@ -89,19 +144,7 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="action_Save_As">
-   <property name="text">
-    <string>Save &amp;As</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+A</string>
-   </property>
-  </action>
   <action name="action_Open">
-   <property name="icon">
-    <iconset resource="windsorlinx.qrc">
-     <normaloff>:/images/fileopen.png</normaloff>:/images/fileopen.png</iconset>
-   </property>
    <property name="text">
     <string>&amp;Open</string>
    </property>
@@ -109,44 +152,18 @@
     <string>Ctrl+O</string>
    </property>
   </action>
-  <action name="action_Copy">
-   <property name="icon">
-    <iconset resource="windsorlinx.qrc">
-     <normaloff>:/images/editcopy.png</normaloff>:/images/editcopy.png</iconset>
-   </property>
+  <action name="actionPlot">
    <property name="text">
-    <string>&amp;Copy</string>
+    <string>P&amp;lot</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+C</string>
-   </property>
-  </action>
-  <action name="action_Connect">
-   <property name="icon">
-    <iconset resource="windsorlinx.qrc">
-     <normaloff>:/images/connect.png</normaloff>:/images/connect.png</iconset>
-   </property>
-   <property name="text">
-    <string>Co&amp;nnect</string>
-   </property>
-   <property name="shortcut">
-    <string>Ctrl+N</string>
-   </property>
-  </action>
-  <action name="action_About">
-   <property name="text">
-    <string>&amp;About</string>
-   </property>
-  </action>
-  <action name="action_Help">
-   <property name="text">
-    <string>&amp;Contents</string>
+    <string>Ctrl+L</string>
    </property>
   </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <resources>
-  <include location="windsorlinx.qrc"/>
+  <include location="terminal.qrc"/>
  </resources>
  <connections/>
 </ui>

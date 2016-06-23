@@ -108,10 +108,10 @@ private slots:
     void loadExampleFile();
 #endif
 private:
+    QByteArray Data;
     QTimer* connectTimer;
     void initActionsConnections();
     bool checkSerialPort();
-//    void loadTemp();
     bool foundSerialPort;
     bool saveFile(const QString &fileName);
     Ui::MainWindow *ui;
@@ -119,8 +119,6 @@ private:
     QSerialPort *serial;
     QTimer *serialTimeOut;
 
-//    static const QString rdFile(void){ return("rd.txt"); };
-//    static const QString tFile(void){ return("temp.txt");};
     static const QString helpString(void){ return("hh.exe aggralinx.chm");};
 #ifdef  QT_DEBUG
     static const QString exampleFile(void){ return("AG_Sample_Data.txt"); };
