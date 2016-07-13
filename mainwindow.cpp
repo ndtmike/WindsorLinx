@@ -184,11 +184,34 @@ void MainWindow::initActionsConnections()
     connect(ui->actionPlot, SIGNAL(triggered()), this, SLOT(cleanData()));
 }
 
-void MainWindow::cleanData()
+void MainWindow::cleanData()//main function that takes raw data and transforms to usable
 {
+    QString buffer;
+    QTextStream display( &buffer );
+
     Parser* p = new Parser( this, Data);
+    for(qint64 i = 0; i < p->Data.size();++i){
+        display << tr("Test Number: ")<< i << '\n'
+//        << p->Data[i].Month<<'-'<<p->Data[i].Day <<'-'<< p->Data[i].Year <<'\t'
+//        << p->Data[i].Hour <<':'<< p->Data[i].Minute <<' '<< p->Data[i].AmPm <<'\n'
+        << p->Data[i].TestDateTime.toString("MM.dd.yyyy hh:mm") <<'\n'
+        << tr("Power: ") << p->Data[i].StrPower << '\t'
+        << tr("Density: ") << p->Data[i].StrDensity << '\n'
+        << tr("rMoh: ") << p->Data[i].StrMoh << '\n'
+        << tr("Units: ") << p->Data[i].StrUnits << '\n'
+        << tr("AggSize: ") << p->Data[i].StrAggSize << '\n'
+        << tr("Concrete Weight: ") << p->Data[i].StrWeight << '\n'<< '\n'
+        << tr("Exposed Probe Length First Reading: ")<< QString::number( p->Data[i].Dist[0],'f',1)<<'\n'
+        << tr("Concrete Strength First Reading: ")<< QString::number( p->Data[i].Str[0],'f',1)<<'\n'
+        << tr("Exposed Probe Length Second Reading: ")<< QString::number( p->Data[i].Dist[1],'f',1)<<'\n'
+        << tr("Concrete Strength Second Reading: ")<< QString::number( p->Data[i].Str[1],'f',1)<<'\n'
+        << tr("Exposed Probe Length Third Reading: ")<< QString::number( p->Data[i].Dist[2],'f',1)<<'\n'
+        << tr("Concrete Strength Second Reading: ")<< QString::number( p->Data[i].Str[2],'f',1)<<'\n'<<'\n'
+        << tr("Average Exposed Probe Length :")<< p->Data[i].avgDist()<<'\n'
+        << tr("Average Compressive Strength")<< p->Data[i].avgPres();
+    }
     delete p;
-    console->putData("");
+    console->setPlainText( buffer );
 }
 
 void MainWindow::processSerialPort()

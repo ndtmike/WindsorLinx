@@ -25,6 +25,7 @@
 #include <QVector>
 #include <QtCore>
 #include <QDebug>
+#include <QDate>
 #include <math.h>
 
 #include "mainwindow.h"
@@ -37,18 +38,21 @@ public:
 
     qint64 ADCZero;
     qint64 ADCFullScale;
-    QString AmPm;
+
+/*    QString AmPm;
     qint64 Day;
     qint64 Hour;
     qint64 Minute;
     qint64 Month;
+*/
     QString StrAggSize;
     QString StrDensity;
     QString StrMoh;
     QString StrPower;
     QString StrUnits;
     QString StrWeight;
-    qint64 Year;
+    QDateTime TestDateTime;
+//    qint64 Year;
 
     QVector <qint64> ADC;
     QVector <double> Dist;
@@ -67,7 +71,10 @@ private:
 
     Units PrivateUnits; // for calculations benefit
     Power PrivatePower; // for power calculations
+    Weight PrivateWeight;
     Moh PrivateMoh;
+
+    qint64 HexQByteArraytoInt(QByteArray &in);
     void LoadStrAggSize(QByteArray &in);
     void LoadDateTime(QByteArray &in);
     void LoadStrDensity(QByteArray &in);
@@ -75,6 +82,7 @@ private:
     void LoadStrPower(QByteArray &in);
     void LoadStrUnits(QByteArray &in);
     void LoadStrWeight(QByteArray &in);
+    void LoadVectors(QByteArray &in);
     QByteArray RemoveAscii(QByteArray &in);
 
     double CalcDistance( qint64 adc );
@@ -94,6 +102,7 @@ private:
     static int AggSizePos(void){return(10);}
     static int DensityLength(void){return(1);}
     static int DensityPos(void){return(6);}
+    static int HexToDec(void){return(16);}
     static int MohLength(void){return(1);}
     static int MohPos(void){return(8);}
     static int PWRLength(void){return(1);}
@@ -103,35 +112,37 @@ private:
     static int WeightPos(void){return(7);}
     static int UnitsLength(void){return(1);}
     static int UnitsPos(void){return(9);}
-    static int HexToDec(void){return(16);}
+
     //for CalcDistance
     static double ADCScaleFactorMetric(void){return(38.100);}
-    static double InchConvFactor(void){ return(0.0393701);}
     static double DistanceOffsetMetric(void){ return( 25.400);}
+    static double InchConvFactor(void){ return(25.4);}
     // for CalcPower
     static double HighPowerB(void){return(142.0);}
     static double HighPowerM(void){return(0.000760);}
-    static double StdB3(void){return(4366.0);}
-    static double StdB4(void){return(5093.0);}
-    static double StdB5(void){return(6060.0);}
-    static double StdB6(void){return(7311.0);}
-    static double StdB7(void){return(8791.0);}
-    static double LowB3(void){return(2372.0);}
-    static double LowB4(void){return(2471.0);}
-    static double LowB5(void){return(2958.0);}
-    static double LowB6(void){return(3653.0);}
-    static double LowB7(void){return(4331.0);}
-    static double StdM3(void){return(1.810);}
-    static double StdM4(void){return(1.888);}
-    static double StdM5(void){return(2.000);}
+    static double StdB3(void){return(43.680);}
+    static double StdB4(void){return(51.74);}
+    static double StdB5(void){return(59.79);}
+    static double StdB6(void){return(73.130);}
+    static double StdB7(void){return(87.950);}
+    static double StdM3(void){return(1.81057);}
+    static double StdM4(void){return(1.9013);}
+    static double StdM5(void){return(1.9882);}
     static double StdM6(void){return(2.172);}
-    static double StdM7(void){return(2.375);}
-    static double LowM3(void){return(0.9351);}
-    static double LowM4(void){return(0.9321);}
-    static double LowM5(void){return(0.9898);}
-    static double LowM6(void){return(1.0860);}
-    static double LowM7(void){return(1.1790);}
+    static double StdM7(void){return(2.3761);}
+    static double LowB3(void){return(22.034);}
+    static double LowB4(void){return(25.495);}
+    static double LowB5(void){return(30.00);}
+    static double LowB6(void){return(36.542);}
+    static double LowB7(void){return(43.545);}
+    static double LowM3(void){return(0.9079);}
+    static double LowM4(void){return(0.9428);}
+    static double LowM5(void){return(0.9959);}
+    static double LowM6(void){return(1.0858);}
+    static double LowM7(void){return(1.1797);}
     static double MPAToPSI(void){return(145.0);}
+    static int TestSetSize(void){return(3);}
+    static double TruncateScale(void){return(100.0);}
 };
 
 class Parser:QWidget
@@ -140,9 +151,9 @@ public:
     Parser( QWidget* parent = 0 , const QByteArray &in = "");
     ~Parser();
 
-private:
     QVector<DataSet> Data;
 
+private:
     static qint64 DataSetSize(void){return(16);}
 };
 

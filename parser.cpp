@@ -41,12 +41,13 @@ DataSet::DataSet(void){
 
     ADCZero = 0;
     ADCFullScale = 512;
-    AmPm = "AM";
+/*    AmPm = "AM";
     Day = 0;
     Month = 0;
     Year = 0;
     Hour = 0;
     Minute = 0;
+*/
     StrAggSize = QMainWindow::tr("Medium Aggregate Size");
     StrDensity = QMainWindow::tr("Standard Density Concrete");
     StrMoh = QMainWindow::tr("Moh Value 4");
@@ -57,14 +58,13 @@ DataSet::DataSet(void){
 
 DataSet::DataSet(const QByteArray &in){
 
-    ADC.resize(3);
-    Dist.resize(3);//must use re-size as can't declare size in declaration
-    Str.resize(3);
+    ADC.resize(TestSetSize());
+    Dist.resize(TestSetSize());//must use re-size as can't declare size in declaration
+    Str.resize(TestSetSize());
 
     QByteArray clean = in;
     QByteArray time, pwr, density, weight,
-            moh, units, aggsize, adczero, adcfull,
-            data0, data1, data2;
+            moh, units, aggsize;
     clean = RemoveAscii(clean);//clean copy without the ASCII offset
 
     time = clean.left(TimeLength()); //TimePos == 0
@@ -81,36 +81,11 @@ DataSet::DataSet(const QByteArray &in){
     LoadStrUnits(units);
     aggsize = clean.mid(AggSizePos(),AggSizeLength());
     LoadStrAggSize(aggsize);
+    LoadVectors( clean );
 
-    bool ok;
-
-    adczero = clean.mid(ADCZeroPos(),ADCZeroLength());
-    adczero = adczero.toHex();  //convert to hex sring
-    ADCZero = adczero.toInt(&ok,HexToDec()); //convert to value
-    adcfull = clean.mid(ADCFullScalePos(), ADCFullScaleLength());
-    adcfull = adcfull.toHex();
-    ADCFullScale = adcfull.toInt(&ok,HexToDec());
-
-    data0 = clean.mid(ADCData0Pos(), ADCData0Length());
-    data0 = data0.toHex();
-    ADC[0] = data0.toInt( &ok , HexToDec());
-    Dist[0] = CalcDistance(ADC[0]);
-    Str[0] = CalcStr(Dist[0]);
-
-    data1 = clean.mid(ADCData1Pos(), ADCData1Length());
-    data1 = data1.toHex();
-    ADC[1] = data1.toInt( &ok, HexToDec() );
-    Dist[1] = CalcDistance(ADC[1]);
-    Str[1] = CalcStr(Dist[1]);
-
-    data2 = clean.mid(ADCData2Pos(), ADCData2Length());
-    data2 = data2.toHex();
-    ADC[2] = data2.toInt( &ok, HexToDec());
-    Dist[2] = CalcDistance(ADC[2]);
-    Str[2] = CalcStr(Dist[2]);
-
-    qDebug()<< Month<<'-'<<Day <<'-'<< Year <<'\n'
-           << Hour <<':'<< Minute <<' '<< AmPm <<'\n'
+    qDebug()
+//            << Month<<'-'<<Day <<'-'<< Year <<'\n'
+//           << Hour <<':'<< Minute <<' '<< AmPm <<'\n'
            << "Power: " << StrPower << '\n'
            << "StrDensity: " << StrDensity << '\n'
            << "StrMoh: " << StrMoh << '\n'
@@ -149,12 +124,21 @@ qint64 DataSet::avgPres(){
 }
 
 double DataSet::CalcDistance( qint64 adc  ){
-//doesn't quite match unit, rounding error?
+
     double distance, span, adcscale, adcdistance;
 
-    span = (double)((ADCFullScale - ADCZero) - 1.0);
+    span = (double)((ADCFullScale - ADCZero));
     adcscale = ADCScaleFactorMetric() / span;
-    adcdistance = (double)(adc-ADCZero - 1.0);
+
+    qDebug()<<"adcscale before: "<< adcscale;
+
+    adcscale = TruncateScale() * adcscale; //scale up for round function
+    adcscale = floor (adcscale); //round off the value to match unit whch truncates number
+    adcscale = adcscale/TruncateScale(); // scale it back down
+
+    qDebug()<<"adcscale after: "<< adcscale;
+
+    adcdistance = (double)(adc-ADCZero );
 
     switch(PrivateUnits){
     case MPA:
@@ -164,15 +148,6 @@ double DataSet::CalcDistance( qint64 adc  ){
             distance = (DistanceOffsetMetric() + (adcdistance * adcscale)) * InchConvFactor();
             break;
     }
-/*
-   qDebug()<< "adc: " << adc <<'\n'
-          <<"ADCFullScale: "<< ADCFullScale << '\n'
-          <<"ADCZero: "<< ADCZero <<'\n'
-          <<"adcdistance"<< QString::number(adcdistance,'f',1) << '\n'
-         <<"span: "<< QString::number( span, 'f', 1) << '\n'
-         <<"adcscale: " << QString::number(adcscale,'f',1) << '\n'
-         <<"distance: " << QString::number(distance,'f',1)<<'\n'<<'\n';
-*/
     return(distance);
 }
 
@@ -183,14 +158,11 @@ double DataSet::CalcStr( double d ){
 
     d = PrivateUnits == PSI ? d / InchConvFactor() : d;
 
-    if (PrivatePower == High_Power)
-    {
-      y = HighPowerB() * exp( d * HighPowerM());
-    }
-    else
-    {
-      if (PrivatePower == Std_Power)
-      {
+    switch (PrivatePower){
+    case High_Power:
+        y = HighPowerB() * exp( d * HighPowerM());
+        break;
+    case Std_Power:
         switch (PrivateMoh){
         case Value_3:
            b = StdB3();
@@ -213,9 +185,12 @@ double DataSet::CalcStr( double d ){
             m = StdM7();
            break;
         }
-      }
-      if (PrivatePower == Low_Power)
-      {
+        if(PrivateWeight == Med_Weight){
+            b = StdB3();
+            m = StdM3();
+        }
+        break;
+    case Low_Power:
         switch (PrivateMoh){
         case Value_3:
            b = LowB3();
@@ -238,16 +213,24 @@ double DataSet::CalcStr( double d ){
             m = LowM7();
            break;
         }
-      }
-      y = (m * d) - b;
+        if(PrivateWeight == Med_Weight){
+            b = LowB3();
+            m = LowM3();
+        }
+        break;
     }
-/*
+    y = (m * d) - b;
+    qDebug()<< "m: "<< m << '\n'
+            << "d: "<< d << '\n'
+            << "b: "<< b << '\n';
+
+
     // Scale for low and super-low weights
-    if (submenuWeight == SUBMENU_WEIGHT_LOW)
+    if (PrivateWeight == Low_Weight)
     {
       y *= 0.84;
     }
-    else if (submenuWeight == SUBMENU_WEIGHT_SUPER_LOW)
+    else if (PrivateWeight == Very_Low_Weight)
     {
       y *= 0.66;
     }
@@ -256,9 +239,20 @@ double DataSet::CalcStr( double d ){
     {
       y = 0;
     }
-*/
+
     y = PrivateUnits == PSI ? y * MPAToPSI() : y;
     return(y);
+}
+
+qint64 DataSet::HexQByteArraytoInt(QByteArray &in){
+
+    QByteArray data = in;
+    bool ok;
+    qint64 out;
+
+    data = data.toHex(); //convert to hex string
+    out = data.toInt( &ok, 16 );
+    return(out);
 }
 
 void DataSet::LoadStrAggSize(QByteArray &in){
@@ -281,7 +275,7 @@ void DataSet::LoadStrAggSize(QByteArray &in){
 
 void DataSet::LoadDateTime(QByteArray &in){
 
-    Month = (((in[3])>>4) & 0x01)*10;     //BCD for Month tens place
+/*    Month = (((in[3])>>4) & 0x01)*10;     //BCD for Month tens place
     Month += (in[3]) & 0x0f;      //BCD for Month
     Day = (((in[2])>>4) & 0x07)*10;     //BCD for Minutes tens place
     Day += (in[2]) & 0x0f;      //BCD for Minutes
@@ -292,7 +286,27 @@ void DataSet::LoadDateTime(QByteArray &in){
     Minute = (((in[0])>>4) & 0x07)*10;     //BCD for Minutes tens place
     Minute += (in[0]) & 0x0f;      //BCD for Minutes
     AmPm = ((in[1]) & 0x20) > 0 ? "PM":"AM";
+*/
+    qint64 month, day, year, hour, minute;
+
+    month = (((in[3])>>4) & 0x01)*10;     //BCD for Month tens place
+    month += (in[3]) & 0x0f;      //BCD for Month
+    day = (((in[2])>>4) & 0x07)*10;     //BCD for Minutes tens place
+    day += (in[2]) & 0x0f;      //BCD for Minutes
+    year = (((in[4])>>4) & 0x0F)*10;     //BCD for Minutes tens place
+    year += (in[4]) & 0x0f;      //BCD for Minutes
+    hour =(((in[1])>>4) & 0x01)* 10; // BCD for Hours tens place
+    hour += (in[1])& 0x0f ;  //BCD for Hours
+    hour = ((in[1]) & 0x20) > 0 ? hour + 12: hour;
+    minute = (((in[0])>>4) & 0x07)*10;     //BCD for Minutes tens place
+    minute += (in[0]) & 0x0f;      //BCD for Minutes
+
+    QDate testdate(year, month, day) ;
+    QTime testtime(hour, minute);
+    QDateTime testdatetime( testdate,  testtime );
+    TestDateTime = testdatetime;
 }
+
 void DataSet::LoadStrDensity(QByteArray &in){
 
     int value = (int)in[0];     //only one character string
@@ -382,17 +396,48 @@ void DataSet::LoadStrWeight(QByteArray &in){
     switch (weight){
         case High_Weight:
             StrWeight = QMainWindow::tr("High Weight Concrete");
+            PrivateWeight = High_Weight;
             break;
         case Med_Weight:
             StrWeight = QMainWindow::tr("Medium Weight");
+            PrivateWeight = Med_Weight;
             break;
         case Low_Weight:
             StrWeight = QMainWindow::tr("Low Weight");
+            PrivateWeight = Low_Weight;
             break;
         case Very_Low_Weight:
             StrWeight = QMainWindow::tr("Very Low Weight");
+            PrivateWeight = Very_Low_Weight;
             break;
     }
+}
+
+void DataSet::LoadVectors( QByteArray &in ){
+
+    QByteArray adczero, adcfull,
+            data0, data1, data2;
+
+    adczero = in.mid(ADCZeroPos(),ADCZeroLength());
+    ADCZero = HexQByteArraytoInt( adczero);
+
+    adcfull = in.mid(ADCFullScalePos(), ADCFullScaleLength());
+    ADCFullScale = HexQByteArraytoInt(adcfull);
+
+    data0 = in.mid(ADCData0Pos(), ADCData0Length());
+    ADC[0] = HexQByteArraytoInt(data0);
+    Dist[0] = CalcDistance(ADC[0]);
+    Str[0] = CalcStr(Dist[0]);
+
+    data1 = in.mid(ADCData1Pos(), ADCData1Length());
+    ADC[1] = HexQByteArraytoInt(data1);
+    Dist[1] = CalcDistance(ADC[1]);
+    Str[1] = CalcStr(Dist[1]);
+
+    data2 = in.mid(ADCData2Pos(), ADCData2Length());
+    ADC[2] = HexQByteArraytoInt(data1);
+    Dist[2] = CalcDistance(ADC[2]);
+    Str[2] = CalcStr(Dist[2]);
 }
 
 QByteArray DataSet::RemoveAscii(QByteArray &in){
