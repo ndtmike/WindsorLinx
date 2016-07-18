@@ -88,40 +88,37 @@ public:
 protected:
 
 private slots:
-    void openSerialPort();
-    void closeSerialPort();
-    void processSerialPort();
     void about();
-    void help();
-    void writeData(const QByteArray &data);
-    void readData();
     void cleanData();
-    void handleError(QSerialPort::SerialPortError error);
-    void showSplash();
-    void endUpload();
-    bool saveAs();
+    void closeSerialPort();
     void copy();
-    void save();
+    void endUpload();
+    void handleError(QSerialPort::SerialPortError error);
+    void help();
     void openFile();
-    void sendConnect();
-#ifdef QT_DEBUG
-    void loadExampleFile();
-#endif
+    void openSerialPort();
+    void processSerialPort();
+    void readData();
+    bool saveAs();
+    void showSplash();
+    void save();
+
 private:
-    QByteArray Data;
+
     QTimer* connectTimer;
-    void initActionsConnections();
-    bool checkSerialPort();
-    bool foundSerialPort;
-    bool saveFile(const QString &fileName);
-    Ui::MainWindow *ui;
+    QByteArray Data;
+    bool DataUpload;
     Console *console;
+    bool foundSerialPort;
     QSerialPort *serial;
     QTimer *serialTimeOut;
+    Ui::MainWindow *ui;
+
+    bool checkSerialPort();
+    void initActionsConnections();
+    QString resultsFormat( Parser &r, qint64 i);
+    bool saveFile(const QString &fileName);
 
     static const QString helpString(void){ return("hh.exe aggralinx.chm");};
-#ifdef  QT_DEBUG
-    static const QString exampleFile(void){ return("AG_Sample_Data.txt"); };
-#endif
 };
 #endif // MAINWINDOW_H

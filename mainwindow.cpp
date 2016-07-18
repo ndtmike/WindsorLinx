@@ -63,8 +63,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(serial, SIGNAL(error(QSerialPort::SerialPortError)), this,
             SLOT(handleError(QSerialPort::SerialPortError)));
     connect(serial, SIGNAL(readyRead()), this, SLOT(readData()));
-    connect(console, SIGNAL(getData(QByteArray)), this, SLOT(writeData(QByteArray)));
     connect(serialTimeOut,SIGNAL(timeout()), this,SLOT(endUpload()));
+
+    DataUpload = false;
 
 #ifndef QT_DEBUG
     QTimer* init_timer = new QTimer(this);
@@ -79,7 +80,7 @@ MainWindow::MainWindow(QWidget *parent) :
 #endif
 #endif
     connectTimer = new QTimer(this);
-    connect(connectTimer,SIGNAL(timeout()), this,SLOT(sendConnect()));
+//    connect(connectTimer,SIGNAL(timeout()), this,SLOT(sendConnect()));
 
 }
 
@@ -90,33 +91,6 @@ MainWindow::~MainWindow()
     delete ui;
     delete console;
     delete serial;
-}
-
-void MainWindow::openSerialPort()
-{
-    serial->setBaudRate(9600);
-    serial->setDataBits(QSerialPort::Data8);
-    serial->setParity(QSerialPort::NoParity);
-    serial->setStopBits(QSerialPort::OneStop);
-    serial->setFlowControl(QSerialPort::NoFlowControl);
-    if (serial->open(QIODevice::ReadWrite
-                     )) {
-            console->setEnabled(true);
-            console->setLocalEchoEnabled( true);
-            ui->statusBar->showMessage(tr("Connected"));
-    } else {
-        QMessageBox::critical(this, tr("Error"), serial->errorString());
-
-        ui->statusBar->showMessage(tr("Open error"));
-    }
-}
-
-void MainWindow::closeSerialPort()
-{
-    if (serial->isOpen())
-        serial->close();
-    console->setEnabled(false);
-    ui->statusBar->showMessage(tr("Disconnected"));
 }
 
 void MainWindow::about()
@@ -134,106 +108,6 @@ void MainWindow::about()
                tr("Aggralinx is based in part on the work of the <a href=\"http://qwt.sf.net\"> Qwt project (http://qwt.sf.net)")*/;
 
     QMessageBox::information(this, tr("About Aggrameter"), s);
-}
-
-void MainWindow::help()
-{
-    QProcess* help = new QProcess(this);
-    help->start("hh.exe Windsorlinx.chm");
-}
-void MainWindow::sendConnect(){
-    writeData("S");
-}
-
-void MainWindow::writeData(const QByteArray &data)
-{
-    serial->write(data);
-}
-
-void MainWindow::readData()
-{
-    connectTimer->stop();
-    serialTimeOut->start(500);
-    Data += serial->readAll();
-    console->putData(serial->readAll());
-}
-
-void MainWindow::handleError(QSerialPort::SerialPortError error)
-{
-    if (error == QSerialPort::ResourceError) {
-        QMessageBox::critical(this, tr("Critical Error"), serial->errorString());
-        closeSerialPort();
-    }
-}
-
-void MainWindow::initActionsConnections()
-{
-    ui->actionQuit->setEnabled(true);
-    ui->actionPlot->setEnabled(false);
-    ui->actionSaveAs->setEnabled(false);
-    ui->action_Save->setEnabled(false);
-    ui->action_Open->setEnabled(true);
-
-    connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
-    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
-    connect(ui->actionSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
-    connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(copy()));
-    connect(ui->actionHelp, SIGNAL(triggered()), this, SLOT(help()));
-    connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(save()));
-    connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(openFile()));
-    connect(ui->actionPlot, SIGNAL(triggered()), this, SLOT(cleanData()));
-}
-
-void MainWindow::cleanData()//main function that takes raw data and transforms to usable
-{
-    QString buffer;
-    QTextStream display( &buffer );
-
-    Parser* p = new Parser( this, Data);
-    for(qint64 i = 0; i < p->Data.size();++i){
-        display << tr("Test Number: ")<< i << '\n'
-//        << p->Data[i].Month<<'-'<<p->Data[i].Day <<'-'<< p->Data[i].Year <<'\t'
-//        << p->Data[i].Hour <<':'<< p->Data[i].Minute <<' '<< p->Data[i].AmPm <<'\n'
-        << p->Data[i].TestDateTime.toString("MM.dd.yyyy hh:mm") <<'\n'
-        << tr("Power: ") << p->Data[i].StrPower << '\t'
-        << tr("Density: ") << p->Data[i].StrDensity << '\n'
-        << tr("rMoh: ") << p->Data[i].StrMoh << '\n'
-        << tr("Units: ") << p->Data[i].StrUnits << '\n'
-        << tr("AggSize: ") << p->Data[i].StrAggSize << '\n'
-        << tr("Concrete Weight: ") << p->Data[i].StrWeight << '\n'<< '\n'
-        << tr("Exposed Probe Length First Reading: ")<< QString::number( p->Data[i].Dist[0],'f',1)<<'\n'
-        << tr("Concrete Strength First Reading: ")<< QString::number( p->Data[i].Str[0],'f',1)<<'\n'
-        << tr("Exposed Probe Length Second Reading: ")<< QString::number( p->Data[i].Dist[1],'f',1)<<'\n'
-        << tr("Concrete Strength Second Reading: ")<< QString::number( p->Data[i].Str[1],'f',1)<<'\n'
-        << tr("Exposed Probe Length Third Reading: ")<< QString::number( p->Data[i].Dist[2],'f',1)<<'\n'
-        << tr("Concrete Strength Second Reading: ")<< QString::number( p->Data[i].Str[2],'f',1)<<'\n'<<'\n'
-        << tr("Average Exposed Probe Length :")<< p->Data[i].avgDist()<<'\n'
-        << tr("Average Compressive Strength")<< p->Data[i].avgPres();
-    }
-    delete p;
-    console->setPlainText( buffer );
-}
-
-void MainWindow::processSerialPort()
-{
-
-    foundSerialPort = checkSerialPort();
-    if(foundSerialPort){
-        openSerialPort();
-        connectTimer->start(500);
-    }
-}
-
-void MainWindow::showSplash()
-{
-    const int five_sec = 5000;
-
-    SplashDialog* splash = new SplashDialog();
-    splash->setModal( true );
-    splash->show();
-
-    QTimer* splash_timer = new QTimer(this);
-    splash_timer->singleShot(five_sec, this, SLOT(processSerialPort()));
 }
 
 bool MainWindow::checkSerialPort()
@@ -273,42 +147,94 @@ bool MainWindow::checkSerialPort()
     return(r);
 }
 
-#ifdef QT_DEBUG
-void MainWindow::loadExampleFile()
+void MainWindow::copy()
 {
-    QFile file(exampleFile());
-    QTextStream load(&file);
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
-    console->setPlainText("");
-    file.open(QFile::ReadOnly | QFile::Text);
-    QTextStream ReadFile(&file);
-    console->setPlainText(load.readAll());
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-    file.close();
-//    saveFile(rdFile());
-    serialTimeOut->start(500);
+    console->selectAll();
+    console->copy();
 }
-#endif
+
+void MainWindow::cleanData()//main function that takes raw data and transforms to usable
+{
+    QString buffer;
+    QTextStream display( &buffer );
+
+    Parser p( this, Data );
+
+    for(qint64 i = 0; i < p.Data.size();++i){
+        display << tr("Test Number: ")<< i+1 <<'\n'
+                << p.Data[i].TestDateTime.toString("MM/dd/yyyy hh:mm") <<'\n'
+                << tr("Power: ") << p.Data[i].StrPower << '\t'
+                << tr("Density: ") << p.Data[i].StrDensity << '\n'
+                << tr("Moh: ") << p.Data[i].StrMoh << '\t'
+                << tr("Units: ") << p.Data[i].StrUnits << '\n'
+                << tr("Aggregate Size: ") << p.Data[i].StrAggSize << '\n'
+                << tr("Concrete Weight: ") << p.Data[i].StrWeight << '\n' << '\n'
+                << resultsFormat( p , i );
+    }
+    console->setPlainText( buffer );
+    DataUpload = true;
+}
+
+void MainWindow::closeSerialPort()
+{
+    if (serial->isOpen())
+        serial->close();
+    console->setEnabled(false);
+    ui->statusBar->showMessage(tr("Disconnected"));
+}
 
 void MainWindow::endUpload()
 {
     serialTimeOut->stop();
-    QMessageBox::information(this, "endUpload", tr("Upload Complete"));
+
+    if(DataUpload == false){
+        QMessageBox::information(this, "endUpload", tr("Upload Complete"));
 #ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-    cleanData();
+        cleanData();
 #ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
+        QApplication::restoreOverrideCursor();
 #endif
+    }else{
+        QMessageBox::information(this, "endUpload", tr("Restart Program Before Uploading More Data"));
+    }
     ui->action_Save->setEnabled(true);
     ui->actionSaveAs->setEnabled(true);
     ui->action_Open->setEnabled(false);
     ui->actionPlot->setEnabled(true);
+}
+
+void MainWindow::handleError(QSerialPort::SerialPortError error)
+{
+    if (error == QSerialPort::ResourceError) {
+        QMessageBox::critical(this, tr("Critical Error"), serial->errorString());
+        closeSerialPort();
+    }
+}
+
+void MainWindow::help()
+{
+    QProcess* help = new QProcess(this);
+    help->start("hh.exe Windsorlinx.chm");
+}
+
+void MainWindow::initActionsConnections()
+{
+    ui->actionQuit->setEnabled(true);
+    ui->actionPlot->setEnabled(false);
+    ui->actionSaveAs->setEnabled(false);
+    ui->action_Save->setEnabled(false);
+    ui->action_Open->setEnabled(true);
+
+    connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(ui->actionAbout, SIGNAL(triggered()), this, SLOT(about()));
+    connect(ui->actionSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
+    connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(copy()));
+    connect(ui->actionHelp, SIGNAL(triggered()), this, SLOT(help()));
+    connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(save()));
+    connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(openFile()));
+    connect(ui->actionPlot, SIGNAL(triggered()), this, SLOT(cleanData()));
 }
 
 void MainWindow::openFile()
@@ -334,6 +260,85 @@ void MainWindow::openFile()
     ui->actionPlot->setEnabled(true);
 }
 
+void MainWindow::openSerialPort()
+{
+    serial->setBaudRate(9600);
+    serial->setDataBits(QSerialPort::Data8);
+    serial->setParity(QSerialPort::NoParity);
+    serial->setStopBits(QSerialPort::OneStop);
+    serial->setFlowControl(QSerialPort::NoFlowControl);
+    if (serial->open(QIODevice::ReadWrite
+                     )) {
+            console->setEnabled(true);
+            console->setLocalEchoEnabled( true);
+            ui->statusBar->showMessage(tr("Connected"));
+    } else {
+        QMessageBox::critical(this, tr("Error"), serial->errorString());
+
+        ui->statusBar->showMessage(tr("Open error"));
+    }
+}
+
+void MainWindow::processSerialPort()
+{
+
+    foundSerialPort = checkSerialPort();
+    if(foundSerialPort){
+        openSerialPort();
+        connectTimer->start(500);
+    }
+}
+
+void MainWindow::readData()
+{
+    connectTimer->stop();
+    serialTimeOut->start(500);
+    Data += serial->readAll();
+    console->putData(serial->readAll());
+}
+
+QString MainWindow::resultsFormat( Parser &r, qint64 i ){
+    QString buffer;
+    QTextStream display( &buffer );
+
+    if(r.Data[i].StrUnits == "MPA"){
+        display << tr("Exposed Probe Length First Reading: ")<< QString::number( r.Data[i].Dist[0],'f',1)
+                << tr( " mm" )<<'\n'
+                << tr("Concrete Strength First Reading: ")<< QString::number( r.Data[i].Str[0],'f',1)
+                << tr( " MPA" )<<'\n'
+                << tr("Exposed Probe Length Second Reading: ")<< QString::number( r.Data[i].Dist[1],'f',1)
+                << tr( " mm" )<<'\n'
+                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[1],'f',1)
+                << tr( " MPA" )<<'\n'
+                << tr("Exposed Probe Length Third Reading: ")<< QString::number( r.Data[i].Dist[2],'f',1)
+                << tr( " mm" )<<'\n'
+                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[2],'f',1)
+                << tr( " MPA" )<<'\n'<<'\n'
+                << tr("Average Exposed Probe Length: ")<< r.Data[i].avgDist()
+                << tr( " mm" )<<'\n'
+                << tr("Average Compressive Strength: ")<< r.Data[i].avgPres()
+                << tr( " MPA" )<<'\n'<<'\n';
+    }else{
+        display << tr("Exposed Probe Length First Reading: ")<< QString::number( r.Data[i].Dist[0],'f',2)
+                << tr( " inches" )<<'\n'
+                << tr("Concrete Strength First Reading: ")<< QString::number( r.Data[i].Str[0],'f',2)
+                <<tr(" PSI")<<'\n'
+                << tr("Exposed Probe Length Second Reading: ")<< QString::number( r.Data[i].Dist[1],'f',2)
+                << tr( " inches" )<<'\n'
+                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[1],'f',2)
+                << tr( " PSI" )<<'\n'
+                << tr("Exposed Probe Length Third Reading: ")<< QString::number( r.Data[i].Dist[2],'f',2)
+                << tr( " inches" )<<'\n'
+                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[2],'f',2)
+                << tr( " PSI" )<<'\n'<<'\n'
+                << tr("Average Exposed Probe Length: ")<< r.Data[i].avgDist()
+                << tr( " inches" )<<'\n'
+                << tr("Average Compressive Strength: ")<< r.Data[i].avgPres()
+                << tr( " PSI" )<<'\n'<<'\n';
+    }
+    return (buffer);
+}
+
 void MainWindow::save()
 {
     if(saveFileName != ""){
@@ -344,6 +349,21 @@ void MainWindow::save()
     }else{
         saveAs();
     }
+}
+
+bool MainWindow::saveAs()
+{
+    QFileDialog dialog(this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setNameFilter(tr("Text (*.txt)"));
+    QStringList files;
+    if (dialog.exec())
+        files = dialog.selectedFiles();
+    else
+        return false;
+    saveFileName = files.at(0);
+    return saveFile(files.at(0));
 }
 
 bool MainWindow::saveFile(const QString &fileName)
@@ -366,24 +386,47 @@ bool MainWindow::saveFile(const QString &fileName)
 #endif
     return true;
 }
-
-bool MainWindow::saveAs()
+/*
+void MainWindow::sendConnect(){
+ //   writeData("S");
+}
+*/
+void MainWindow::showSplash()
 {
-    QFileDialog dialog(this);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setNameFilter(tr("Text (*.txt)"));
-    QStringList files;
-    if (dialog.exec())
-        files = dialog.selectedFiles();
-    else
-        return false;
-    saveFileName = files.at(0);
-    return saveFile(files.at(0));
+    const int five_sec = 5000;
+
+    SplashDialog* splash = new SplashDialog();
+    splash->setModal( true );
+    splash->show();
+
+    QTimer* splash_timer = new QTimer(this);
+    splash_timer->singleShot(five_sec, this, SLOT(processSerialPort()));
+}
+/*
+void MainWindow::writeData(const QByteArray &data)
+{
+    serial->write(data);
 }
 
-void MainWindow::copy()
+#ifdef QT_DEBUG
+void MainWindow::loadExampleFile()
 {
-    console->selectAll();
-    console->copy();
+    QFile file(exampleFile());
+    QTextStream load(&file);
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+#endif
+    console->setPlainText("");
+    file.open(QFile::ReadOnly | QFile::Text);
+    QTextStream ReadFile(&file);
+    console->setPlainText(load.readAll());
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
+    file.close();
+//    saveFile(rdFile());
+    serialTimeOut->start(500);
 }
+#endif
+*/
+

@@ -28,7 +28,7 @@
 #include <QDate>
 #include <math.h>
 
-#include "mainwindow.h"
+//#include "mainwindow.h"
 #include "datapacket.h"
 class DataSet
 {
@@ -39,12 +39,6 @@ public:
     qint64 ADCZero;
     qint64 ADCFullScale;
 
-/*    QString AmPm;
-    qint64 Day;
-    qint64 Hour;
-    qint64 Minute;
-    qint64 Month;
-*/
     QString StrAggSize;
     QString StrDensity;
     QString StrMoh;
@@ -52,7 +46,6 @@ public:
     QString StrUnits;
     QString StrWeight;
     QDateTime TestDateTime;
-//    qint64 Year;
 
     QVector <qint64> ADC;
     QVector <double> Dist;
@@ -87,6 +80,7 @@ private:
 
     double CalcDistance( qint64 adc );
     double CalcStr( double d);
+
     //for Constructor
     static int ADCZeroLength(void){return(1);}
     static int ADCZeroPos(void){return(11);}
@@ -117,9 +111,20 @@ private:
     static double ADCScaleFactorMetric(void){return(38.100);}
     static double DistanceOffsetMetric(void){ return( 25.400);}
     static double InchConvFactor(void){ return(25.4);}
+    static double PSIConvFactor(void){ return(145.0);}
     // for CalcPower
-    static double HighPowerB(void){return(142.0);}
-    static double HighPowerM(void){return(0.000760);}
+    static double HighPowerB(void){return(2.8);}
+    static double HighPowerM(void){return(0.0602);}
+    static double StdMin3(void){return(28.0);}
+    static double StdMin4(void){return(29.0);}
+    static double StdMin5(void){return(33.0);}
+    static double StdMin6(void){return(36.0);}
+    static double StdMin7(void){return(39.0);}
+    static double LowMin3(void){return(28.0);}
+    static double LowMin4(void){return(29.0);}
+    static double LowMin5(void){return(33.0);}
+    static double LowMin6(void){return(36.0);}
+    static double LowMin7(void){return(39.0);}
     static double StdB3(void){return(43.680);}
     static double StdB4(void){return(51.74);}
     static double StdB5(void){return(59.79);}
