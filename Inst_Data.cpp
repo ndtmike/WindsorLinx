@@ -3,13 +3,13 @@
 ** support, and with no warranty, express or implied, as to its usefulness for
 ** any purpose.
 **
-** File Name: parser.cpp
+** File Name: Inst_Data.cpp
 **
 ** parser.cpp - windsorlinx software
 ** Divides the input stream up into data packets
 **
 ** Author: Michael W. Hoag
-** Copyright Michael W. Hoag 2016
+** Copyright Michael W. Hoag 2017
 ** Email: mike@ndtjames.com
 ** -------------------------------------------------------------------------*/
 
@@ -20,6 +20,29 @@ DataSet::DataSet(DataSet::Test Init_Test)
 {
     TestData.push_back( Init_Test );
 }
+
+void DataSet::AddTest(DataSet::Test test)
+{
+    TestData.push_back( test );
+}
+
+DataSet::Test DataSet::GetTest(std::vector<Test>::iterator itr_current)
+{
+    Test returntest = *itr_current;
+
+    return(returntest);
+}
+
+std::vector<DataSet::Test>::iterator DataSet::GetBeginItr()
+{
+    return( TestData.begin() );
+}
+
+std::vector<DataSet::Test>::iterator DataSet::GetEndItr()
+{
+    return( TestData.end() );
+}
+
 /*
  * Calculates the Exposed Probe Length returns a four
  * unit vector
@@ -41,21 +64,15 @@ std::vector<double> DataSet::TestLength( std::vector<Test>::iterator current_tes
             return_length[LocAVG()] += (double)return_length[i]/(double)NumTests();
         }
     }else{
-        adcscale = span/ADCScaleFactorStandard();
+        adcscale = ADCScaleFactorMetric()/span;
         for(int i=0;i<(NumTests());++i){
             //offset skips elems needed for span
             adcdistance = current_test->ADC[2+i]-current_test->ADC[LocADCZero()];
-            return_length[i] = (double)(adcdistance*adcscale) + DistanceOffsetStandard();
+            return_length[i] = ((double)(adcdistance*adcscale) + DistanceOffsetMetric())
+                    / MMtoInch();
             return_length[LocAVG()] += return_length[i]/(double)NumTests();
         }
     }
-//    adcscale = ADCScaleFactorMetric() / span;
-//    adcscale = TruncateScale() * adcscale; //scale up for round function
-//    adcscale = floor (adcscale); //round off the value to match unit whch truncates number
-//    adcscale = adcscale/TruncateScale(); // scale it back down
-//    adcdistance = (double)(adc-ADCZero );
-//    distance = ((adcdistance * adcscale) + DistanceOffsetMetric());
-
     return(return_length);
 }
 
@@ -67,8 +84,8 @@ std::vector<double> DataSet::TestStrength(std::vector<Test>::iterator current_te
 
     double       b = 0;
     double       m = 0;
-    std::vector<double> length(Vector_Size()); //vector exposed probe lengths
-    std::vector<double> return_vector/*(/*Vector_Size())*/; //return vector
+    std::vector<double> length = TestLength(current_test); //vector exposed probe lengths
+    std::vector<double> return_vector(Vector_Size()); //return vector
 
     Power private_power = current_test->TestProp.PropPower;
     Weight private_weight = current_test->TestProp.PropWeight;
@@ -78,10 +95,9 @@ std::vector<double> DataSet::TestStrength(std::vector<Test>::iterator current_te
     }
     length = TestLength( current_test );
 
-    if(current_test->TestProp.PropUnits == DataSet::PSI){
-        for (auto n : length){
-            n *=MMtoInch();
-        }
+    if(current_test->TestProp.PropUnits == DataSet::PSI){ //converts to mm
+            std::transform(length.begin(), length.end(), length.begin(),
+                std::bind1st(std::multiplies<double>(),MMtoInch()));
     }
     switch (private_power){
     case High_Power:
@@ -211,6 +227,12 @@ std::vector<double> DataSet::TestStrength(std::vector<Test>::iterator current_te
              *y *= 0.66;
         }
     }
+
+    if(current_test->TestProp.PropUnits == DataSet::PSI){ //converts to psi
+            std::transform(return_vector.begin(), return_vector.end(), return_vector.begin(),
+                std::bind1st(std::multiplies<double>(),MPAtoPSI()));
+    }
+
     return(return_vector);
 
 }

@@ -1,15 +1,14 @@
-
 /* ---------------------------------------------------------------------------
 ** This software is furnished "as is", without technical
 ** support, and with no warranty, express or implied, as to its usefulness for
 ** any purpose.
 **
-** File Name: parser.h
+** File Name: Inst_Data.h
 **
 ** Header file for parser.cpp - windsorlinx software
 **
 ** Author: Michael W. Hoag
-** Copyright Michael W. Hoag 2016
+** Copyright Michael W. Hoag 2017
 ** Email: mike@ndtjames.com
 ** -------------------------------------------------------------------------*/
 
@@ -21,20 +20,12 @@
 #include <string>
 #include <ctime>
 #include <algorithm>
-/*
-#include <QtCore>
-#include <QDate>
-#include <QDateTime>
-#include <QDebug>
-#include <QFile>
-#include <QFileDialog>
-#include <QList>
-#include <QMessageBox>
-#include <QString>
-#include <QTextStream>
-#include <QTime>
-#include <QVector>
-*/
+
+/* ---------------------------------------------------------------------------
+** Holds the data for each test as well as each tests properties in a vector.
+** The class does not 'code/decode' the data to strings that is assumed to happen
+** in the QT interface. Thus allowing ease in translation.
+** -------------------------------------------------------------------------*/
 class DataSet
 {
 public:
@@ -55,39 +46,17 @@ public:
     };
 
     struct Test{ //test for the Windsor Probe raw data
-/*        unsigned long ADCZero;
-        unsigned long ADCFullScale;
-        unsigned long ADC1;
-        unsigned long ADC2;
-        unsigned long ADC3;
-*/
         std::vector<long> ADC;
         Prop TestProp;
     };
-/*
-    struct Length{ //calculated from the input data
-        double Length1;
-        double Length2;
-        double Length3;
-        double avgLength;
-    };
 
-    struct Strength{
-        double Strength1;
-        double Strength2;
-        double Strength3;
-        double avgStrength;
-    };
-*/
     DataSet(Test Init_Test); //constructor!!
 
-    std::string StrAggSize(std::vector<Test>::iterator current_test);
-    std::string StrDensity(std::vector<Test>::iterator current_test);
-    std::string StrMoh(std::vector<Test>::iterator current_test);
-    std::string StrPower(std::vector<Test>::iterator current_test);
-    std::string StrUnits(std::vector<Test>::iterator current_test);
-    std::string StrWeight(std::vector<Test>::iterator current_test);
-    std::tm TestDateTime(std::vector<Test>::iterator current_test);
+    void AddTest(Test test);
+    Test GetTest(std::vector<Test>::iterator itr_current);
+    std::vector<Test>::iterator GetBeginItr();
+    std::vector<Test>::iterator GetEndItr();
+
     std::vector<double> TestLength(std::vector<Test>::iterator current_test);
     std::vector<double> TestStrength(std::vector<Test>::iterator current_test);
 
@@ -96,12 +65,11 @@ private:
     std::vector <Test> TestData;
 
     //return vector constants for length and strenght
-    static int Vector_Size(void){return(4);}
     static int LocADCFullScale(void){return(1);}
     static int LocADCZero(void){return(0);}
     static int LocAVG(void){return(3);}
     static int NumTests(void){return(3);}
-
+    static int Vector_Size(void){return(4);}
 
     //for Constructor
     static int ADCZeroLength(void){return(1);}
@@ -170,8 +138,9 @@ private:
     static double LowM5(void){return(0.9959);}
     static double LowM6(void){return(1.0858);}
     static double LowM7(void){return(1.1797);}
+
     static double MMtoInch(void){return(25.4);}
-    static double MPAToPSI(void){return(145.0);}
+    static double MPAtoPSI(void){return(145.0);}
     static int TestSetSize(void){return(3);}
     static double TruncateScale(void){return(100.0);}
 
