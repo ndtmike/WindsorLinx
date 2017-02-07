@@ -9,17 +9,15 @@ SOURCES += \
     mainwindow.cpp \
     console.cpp \
     parser.cpp \
-    datapacket.cpp \
     splash.cpp \
-    instrumentdata.cpp
+    Inst_Data.cpp
 
 HEADERS += \
     mainwindow.h \
     console.h \
     parser.h \
-    datapacket.h \
     splash.h \
-    instrumentdata.h
+    Inst_Data.h
 
 FORMS += \
     mainwindow.ui \
@@ -28,10 +26,13 @@ FORMS += \
 RESOURCES += \
     terminal.qrc
 
+TRANSLATIONS += Internationalization_de.ts \
+               Internationalization_es.ts
+
 DISTFILES +=
 
 win32{
-RC_ICONS += ../icon/NDT_agg1.ico
+RC_ICONS += ../icon/ndt_windsor.ico
 VERSION = 3.0.0.0
 QMAKE_TARGET_COMPANY = James Instruments Inc.
 QMAKE_TARGET_PRODUCT = Windsorlinx

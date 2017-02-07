@@ -15,6 +15,8 @@
 #ifndef PARSER_H
 #define PARSER_H
 
+#include <math.h>
+#include <ctime>
 #include <QString>
 #include <QFile>
 #include <QList>
@@ -26,7 +28,7 @@
 #include <QtCore>
 #include <QDebug>
 #include <QDate>
-#include <math.h>
+
 
 #include "Inst_Data.h"
 
@@ -40,17 +42,16 @@ public:
     ~Parser();
 
     DataSet::Test CreateTest( QByteArray array);
-
+    qint64 HexQByteArraytoInt(QByteArray &in);
     DataSet::AggSize QBAtoAggSize(QByteArray &in);
-//    void LoadDateTime(QByteArray &in);
+    tm QBAtoDateTime(QByteArray &in);
     DataSet::Density QBAtoDensity(QByteArray &in);
     DataSet::Moh QBAtoMoh(QByteArray &in);
     DataSet::Power QBAtoPower(QByteArray &in);
     DataSet::Units QBAtoUnits(QByteArray &in);
+    std::vector<long> QBAtoVectorADC(QByteArray &in);
     DataSet::Weight QBAtoWeight(QByteArray &in);
     QByteArray RemoveAscii(QByteArray &in);
-//    void LoadVectors(QByteArray &in);
-//    QVector<DataSet> Data;
     DataSet* Data;
 
 private:

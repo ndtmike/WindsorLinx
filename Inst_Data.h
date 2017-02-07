@@ -48,6 +48,7 @@ public:
     struct Test{ //test for the Windsor Probe raw data
         std::vector<long> ADC;
         Prop TestProp;
+        tm TestTime;
     };
 
     DataSet();
