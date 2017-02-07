@@ -95,20 +95,21 @@ private slots:
     void endUpload();
     void handleError(QSerialPort::SerialPortError error);
     void help();
+    void lngDeutche();
+    void lngEspanol();
     void openFile();
     void openSerialPort();
     void processSerialPort();
     void readData();
     bool saveAs();
     void showSplash();
-    void save();
 
 private:
 
     QTimer* connectTimer;
+    Console *console;
     QByteArray Data;
     bool DataUpload;
-    Console *console;
     bool foundSerialPort;
     QSerialPort *serial;
     QTimer *serialTimeOut;

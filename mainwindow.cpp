@@ -199,7 +199,7 @@ void MainWindow::endUpload()
     }else{
         QMessageBox::information(this, "endUpload", tr("Restart Program Before Uploading More Data"));
     }
-    ui->action_Save->setEnabled(true);
+
     ui->actionSaveAs->setEnabled(true);
     ui->action_Open->setEnabled(false);
     ui->actionPlot->setEnabled(true);
@@ -219,12 +219,21 @@ void MainWindow::help()
     help->start("hh.exe Windsorlinx.chm");
 }
 
+void MainWindow::lngDeutche()
+{
+
+}
+
+void MainWindow::lngEspanol()
+{
+
+}
+
 void MainWindow::initActionsConnections()
 {
     ui->actionQuit->setEnabled(true);
     ui->actionPlot->setEnabled(false);
     ui->actionSaveAs->setEnabled(false);
-    ui->action_Save->setEnabled(false);
     ui->action_Open->setEnabled(true);
 
     connect(ui->actionQuit, SIGNAL(triggered()), this, SLOT(close()));
@@ -232,9 +241,10 @@ void MainWindow::initActionsConnections()
     connect(ui->actionSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(ui->actionCopy, SIGNAL(triggered()), this, SLOT(copy()));
     connect(ui->actionHelp, SIGNAL(triggered()), this, SLOT(help()));
-    connect(ui->action_Save, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(ui->actionPlot, SIGNAL(triggered()), this, SLOT(cleanData()));
+    connect(ui->actionDeutche, SIGNAL(triggered()), this, SLOT(lngDeutche()));
+    connect(ui->actionEspanol, SIGNAL(triggered()), this, SLOT(lngEspanol()));
 }
 
 void MainWindow::openFile()
@@ -242,22 +252,25 @@ void MainWindow::openFile()
     QString fileName = "";
     fileName = QFileDialog::getOpenFileName(this,
         tr("Open Text File"), "", tr("Text FIles (*.txt)"));
-    saveFileName = fileName;
-    QFile file(saveFileName);
-    file.open(QFile::ReadOnly | QFile::Text);
-    QTextStream load(&file);
+
+    if(fileName !=""){ //check if cancel pressed
+        saveFileName = fileName;
+        QFile file(saveFileName);
+        file.open(QFile::ReadOnly | QFile::Text);
+        QTextStream load(&file);
 #ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
+        QApplication::setOverrideCursor(Qt::WaitCursor);
 #endif
-    console->setPlainText(load.readAll());
+        console->setPlainText(load.readAll());
 #ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
+        QApplication::restoreOverrideCursor();
 #endif
-    file.close();
-    ui->action_Save->setEnabled(true);
-    ui->actionSaveAs->setEnabled(true);
-    ui->action_Open->setEnabled(false);
-    ui->actionPlot->setEnabled(true);
+        file.close();
+        //    ui->action_Save->setEnabled(true);
+        ui->actionSaveAs->setEnabled(true);
+        ui->action_Open->setEnabled(false);
+        ui->actionPlot->setEnabled(true);
+    }
 }
 
 void MainWindow::openSerialPort()
@@ -339,7 +352,7 @@ QString MainWindow::resultsFormat( Parser &r, qint64 i ){
     return (buffer);
 }
 
-void MainWindow::save()
+/*void MainWindow::save()
 {
     if(saveFileName != ""){
         saveFile(saveFileName);
@@ -350,7 +363,7 @@ void MainWindow::save()
         saveAs();
     }
 }
-
+*/
 bool MainWindow::saveAs()
 {
     QFileDialog dialog(this);
@@ -386,11 +399,7 @@ bool MainWindow::saveFile(const QString &fileName)
 #endif
     return true;
 }
-/*
-void MainWindow::sendConnect(){
- //   writeData("S");
-}
-*/
+
 void MainWindow::showSplash()
 {
     const int five_sec = 5000;
@@ -402,31 +411,3 @@ void MainWindow::showSplash()
     QTimer* splash_timer = new QTimer(this);
     splash_timer->singleShot(five_sec, this, SLOT(processSerialPort()));
 }
-/*
-void MainWindow::writeData(const QByteArray &data)
-{
-    serial->write(data);
-}
-
-#ifdef QT_DEBUG
-void MainWindow::loadExampleFile()
-{
-    QFile file(exampleFile());
-    QTextStream load(&file);
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
-    console->setPlainText("");
-    file.open(QFile::ReadOnly | QFile::Text);
-    QTextStream ReadFile(&file);
-    console->setPlainText(load.readAll());
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-    file.close();
-//    saveFile(rdFile());
-    serialTimeOut->start(500);
-}
-#endif
-*/
-
