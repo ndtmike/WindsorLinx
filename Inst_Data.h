@@ -20,12 +20,14 @@
 #include <string>
 #include <ctime>
 #include <algorithm>
+#include <functional>
 
 /* ---------------------------------------------------------------------------
 ** Holds the data for each test as well as each tests properties in a vector.
 ** The class does not 'code/decode' the data to strings that is assumed to happen
 ** in the QT interface. Thus allowing ease in translation.
 ** -------------------------------------------------------------------------*/
+
 class DataSet
 {
 public:

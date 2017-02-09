@@ -33,7 +33,9 @@
 
 #include "Inst_Data.h"
 
-/* Handles the interface between the DataSet class and Qt
+/*
+ *
+ * Handles the interface between the DataSet class and Qt
  *
  */
 class Parser:QWidget
@@ -46,7 +48,6 @@ public:
     std::vector<DataSet::Test>::iterator GetEndItr();
 
     DataSet::Test CreateTest( QByteArray array);
-    qint64 HexQByteArraytoInt(QByteArray &in);
 
     DataSet::AggSize QBAtoAggSize(QByteArray &in);
     tm QBAtoDateTime(QByteArray &in);
@@ -57,8 +58,7 @@ public:
     std::vector<long> QBAtoVectorADC(QByteArray &in);
     DataSet::Weight QBAtoWeight(QByteArray &in);
 
-    QByteArray RemoveAscii(QByteArray &in);
-
+    QDateTime ToQDateTime(std::vector<DataSet::Test>::iterator itr_test);
     QString ToQStrAggsize(std::vector<DataSet::Test>::iterator itr_test);
     QString ToQStrDensity(std::vector<DataSet::Test>::iterator itr_test);
     QString ToQStrMoh(std::vector<DataSet::Test>::iterator itr_test);
@@ -70,6 +70,9 @@ public:
 
 private:
     static qint64 DataSetSize(void){return(16);}
+
+    qint64 HexQByteArraytoInt(QByteArray &in);
+    QByteArray RemoveAscii(QByteArray &in);
 
     //for Constructor
     static int ADCZeroLength(void){return(1);}

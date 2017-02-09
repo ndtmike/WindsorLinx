@@ -212,6 +212,19 @@ DataSet::Weight Parser::QBAtoWeight(QByteArray &in)
     return(weight);
 }
 
+QDateTime Parser::ToQDateTime(std::vector<DataSet::Test>::iterator itr_test)
+{
+    tm test_time;
+    QDateTime return_time;
+
+    DataSet::Test current_test = Data->GetTest( itr_test );
+    test_time = current_test.TestTime;
+    return_time.setDate( QDate( test_time.tm_year + 1900, test_time.tm_mon + 1, test_time.tm_mday ) );
+    return_time.setTime( QTime( test_time.tm_hour, test_time.tm_min, test_time.tm_sec ) );
+
+    return(return_time);
+}
+
 QString Parser::ToQStrAggsize( std::vector<DataSet::Test>::iterator itr_test )
 {
     QString return_string = " ";
