@@ -29,6 +29,7 @@
 #include <QDebug>
 #include <QDate>
 
+#include <vector>
 
 #include "Inst_Data.h"
 
@@ -41,8 +42,12 @@ public:
     Parser( QWidget* parent = 0 , const QByteArray &in = "");
     ~Parser();
 
+    std::vector<DataSet::Test>::iterator GetBeginItr();
+    std::vector<DataSet::Test>::iterator GetEndItr();
+
     DataSet::Test CreateTest( QByteArray array);
     qint64 HexQByteArraytoInt(QByteArray &in);
+
     DataSet::AggSize QBAtoAggSize(QByteArray &in);
     tm QBAtoDateTime(QByteArray &in);
     DataSet::Density QBAtoDensity(QByteArray &in);
@@ -51,7 +56,16 @@ public:
     DataSet::Units QBAtoUnits(QByteArray &in);
     std::vector<long> QBAtoVectorADC(QByteArray &in);
     DataSet::Weight QBAtoWeight(QByteArray &in);
+
     QByteArray RemoveAscii(QByteArray &in);
+
+    QString ToQStrAggsize(std::vector<DataSet::Test>::iterator itr_test);
+    QString ToQStrDensity(std::vector<DataSet::Test>::iterator itr_test);
+    QString ToQStrMoh(std::vector<DataSet::Test>::iterator itr_test);
+    QString ToQStrPower(std::vector<DataSet::Test>::iterator itr_test);
+    QString ToQStrUnits(std::vector<DataSet::Test>::iterator itr_test);
+    QString ToQStrWeight(std::vector<DataSet::Test>::iterator itr_test);
+
     DataSet* Data;
 
 private:

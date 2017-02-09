@@ -101,8 +101,8 @@ std::vector<double> DataSet::TestStrength(std::vector<Test>::iterator current_te
     length = TestLength( current_test );
 
     if(current_test->TestProp.PropUnits == DataSet::PSI){ //converts to mm
-            std::transform(length.begin(), length.end(), length.begin(),
-                std::bind1st(std::multiplies<double>(),MMtoInch()));
+//            std::transform(length.begin(), length.end(), length.begin(),
+//                std::bind1st(std::multiplies<double>(),MMtoInch()));
     }
     switch (private_power){
     case High_Power:
@@ -234,8 +234,8 @@ std::vector<double> DataSet::TestStrength(std::vector<Test>::iterator current_te
     }
 
     if(current_test->TestProp.PropUnits == DataSet::PSI){ //converts to psi
-            std::transform(return_vector.begin(), return_vector.end(), return_vector.begin(),
-                std::bind1st(std::multiplies<double>(),MPAtoPSI()));
+//            std::transform(return_vector.begin(), return_vector.end(), return_vector.begin(),
+//                std::bind1st(std::multiplies<double>(),MPAtoPSI()));
     }
 
     return(return_vector);

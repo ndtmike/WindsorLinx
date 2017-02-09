@@ -160,16 +160,17 @@ void MainWindow::cleanData()//main function that takes raw data and transforms t
 
     Parser p( this, Data );
 
-    for(qint64 i = 0; i < p.Data.size();++i){
+    qint64 i = 0;
+    for( std::vector<DataSet::Test>::iterator itr = p.Data->GetBeginItr(); itr != p.Data->GetEndItr();++i, ++itr){
         display << tr("Test Number: ")<< i+1 <<'\n'
-                << p.Data[i].TestDateTime.toString("MM/dd/yyyy hh:mm") <<'\n'
-                << tr("Power: ") << p.Data[i].StrPower << '\t'
-                << tr("Density: ") << p.Data[i].StrDensity << '\n'
-                << tr("Moh: ") << p.Data[i].StrMoh << '\t'
-                << tr("Units: ") << p.Data[i].StrUnits << '\n'
-                << tr("Aggregate Size: ") << p.Data[i].StrAggSize << '\n'
-                << tr("Concrete Weight: ") << p.Data[i].StrWeight << '\n' << '\n'
-                << resultsFormat( p , i );
+//                << p.Data[i].TestDateTime.toString("MM/dd/yyyy hh:mm") <<'\n'
+                << tr("Power: ") << p.ToQStrPower(itr) << '\t'
+                << tr("Density: ") << p.ToQStrDensity(itr) << '\n'
+                << tr("Moh: ") << p.ToQStrMoh( itr ) << '\t'
+                << tr("Units: ") << p.ToQStrUnits( itr ) << '\n'
+                << tr("Aggregate Size: ") << p.ToQStrAggsize( itr ) << '\n'
+                << tr("Concrete Weight: ") << p.ToQStrWeight( itr ) << '\n' << '\n'
+                << resultsFormat( p , /*i*/ itr );
     }
     console->setPlainText( buffer );
     DataUpload = true;
@@ -310,43 +311,46 @@ void MainWindow::readData()
     console->putData(serial->readAll());
 }
 
-QString MainWindow::resultsFormat( Parser &r, qint64 i ){
+QString MainWindow::resultsFormat( Parser &r,/*qint64*/ std::vector<DataSet::Test>::iterator itr ){
     QString buffer;
     QTextStream display( &buffer );
 
-    if(r.Data[i].StrUnits == "MPA"){
-        display << tr("Exposed Probe Length First Reading: ")<< QString::number( r.Data[i].Dist[0],'f',1)
+    std::vector<double> length = r.Data->TestLength( itr );
+    std::vector<double> strength = r.Data->TestLength( itr );
+
+    if(itr->TestProp.PropUnits == DataSet::MPA){
+        display << tr("Exposed Probe Length First Reading: ")<< QString::number( length[0],'f',1 )
                 << tr( " mm" )<<'\n'
-                << tr("Concrete Strength First Reading: ")<< QString::number( r.Data[i].Str[0],'f',1)
+                << tr("Concrete Strength First Reading: ")<< QString::number( strength[0],'f',1 )
                 << tr( " MPA" )<<'\n'
-                << tr("Exposed Probe Length Second Reading: ")<< QString::number( r.Data[i].Dist[1],'f',1)
+                << tr("Exposed Probe Length Second Reading: ")<< QString::number( length[1],'f',1 )
                 << tr( " mm" )<<'\n'
-                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[1],'f',1)
+                << tr("Concrete Strength Second Reading: ")<< QString::number( strength[1],'f',1 )
                 << tr( " MPA" )<<'\n'
-                << tr("Exposed Probe Length Third Reading: ")<< QString::number( r.Data[i].Dist[2],'f',1)
+                << tr("Exposed Probe Length Third Reading: ")<< QString::number( length[2],'f',1 )
                 << tr( " mm" )<<'\n'
-                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[2],'f',1)
+                << tr("Concrete Strength Second Reading: ")<< QString::number( strength[2],'f',1 )
                 << tr( " MPA" )<<'\n'<<'\n'
-                << tr("Average Exposed Probe Length: ")<< r.Data[i].avgDist()
+                << tr("Average Exposed Probe Length: ")<< QString::number( length[3], 'f', 1 )
                 << tr( " mm" )<<'\n'
-                << tr("Average Compressive Strength: ")<< r.Data[i].avgPres()
+                << tr("Average Compressive Strength: ")<< QString::number( strength[3], 'f', 1 )
                 << tr( " MPA" )<<'\n'<<'\n';
     }else{
-        display << tr("Exposed Probe Length First Reading: ")<< QString::number( r.Data[i].Dist[0],'f',2)
+        display << tr("Exposed Probe Length First Reading: ")<< QString::number( length[0],'f',2)
                 << tr( " inches" )<<'\n'
-                << tr("Concrete Strength First Reading: ")<< QString::number( r.Data[i].Str[0],'f',2)
+                << tr("Concrete Strength First Reading: ")<< QString::number( strength[0],'f',2)
                 <<tr(" PSI")<<'\n'
-                << tr("Exposed Probe Length Second Reading: ")<< QString::number( r.Data[i].Dist[1],'f',2)
+                << tr("Exposed Probe Length Second Reading: ")<< QString::number( length[1],'f',2)
                 << tr( " inches" )<<'\n'
-                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[1],'f',2)
+                << tr("Concrete Strength Second Reading: ")<< QString::number( strength[1],'f',2)
                 << tr( " PSI" )<<'\n'
-                << tr("Exposed Probe Length Third Reading: ")<< QString::number( r.Data[i].Dist[2],'f',2)
+                << tr("Exposed Probe Length Third Reading: ")<< QString::number( length[2],'f',2)
                 << tr( " inches" )<<'\n'
-                << tr("Concrete Strength Second Reading: ")<< QString::number( r.Data[i].Str[2],'f',2)
+                << tr("Concrete Strength Second Reading: ")<< QString::number( strength[2],'f',2)
                 << tr( " PSI" )<<'\n'<<'\n'
-                << tr("Average Exposed Probe Length: ")<< r.Data[i].avgDist()
+                << tr("Average Exposed Probe Length: ")<< QString::number( length[3],'f',2)
                 << tr( " inches" )<<'\n'
-                << tr("Average Compressive Strength: ")<< r.Data[i].avgPres()
+                << tr("Average Compressive Strength: ")<< QString::number( strength[0],'f',2)
                 << tr( " PSI" )<<'\n'<<'\n';
     }
     return (buffer);

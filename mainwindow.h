@@ -59,9 +59,13 @@
 #include <QList>
 #include <QProcess>
 
+#include <vector>
+
 #include "console.h"
-#include "splash.h"
+#include "Inst_Data.h"
 #include "parser.h"
+#include "splash.h"
+
 
 #define TEST_REG
 
@@ -117,7 +121,7 @@ private:
 
     bool checkSerialPort();
     void initActionsConnections();
-    QString resultsFormat( Parser &r, qint64 i);
+    QString resultsFormat( Parser &r/*qint64 i*/, std::vector<DataSet::Test>::iterator itr);
     bool saveFile(const QString &fileName);
 
     static const QString helpString(void){ return("hh.exe aggralinx.chm");};

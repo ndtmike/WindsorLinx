@@ -34,6 +34,16 @@ Parser::~Parser()
 {
 }
 
+std::vector<DataSet::Test>::iterator Parser::GetBeginItr()
+{
+    return(Data->GetBeginItr());
+}
+
+std::vector<DataSet::Test>::iterator Parser::GetEndItr()
+{
+    return(Data->GetEndItr());
+}
+
 DataSet::Test Parser::CreateTest(QByteArray array)
 {
     QByteArray clean = array;
@@ -202,3 +212,122 @@ DataSet::Weight Parser::QBAtoWeight(QByteArray &in)
     return(weight);
 }
 
+QString Parser::ToQStrAggsize( std::vector<DataSet::Test>::iterator itr_test )
+{
+    QString return_string = " ";
+    DataSet::Test current_test = Data->GetTest( itr_test);
+
+    switch (current_test.TestProp.PropAggSize){
+        case DataSet::Med_Agg:
+            return_string = "Medium Aggregate";
+            break;
+        case DataSet::Small_Agg:
+            return_string = "Small Aggregate";
+            break;
+        case DataSet::Large_Agg:
+            return_string = "Large Aggregate";
+            break;
+    }
+
+    return(return_string);
+}
+
+QString Parser::ToQStrDensity( std::vector<DataSet::Test>::iterator itr_test )
+{
+    QString return_string = " ";
+    DataSet::Test current_test = Data->GetTest( itr_test );
+
+    switch (current_test.TestProp.PropDensity){
+        case DataSet::Std_Density:
+            return_string = "Standard Density";
+            break;
+        case DataSet::Light_Density:
+            return_string = "Light Density";
+            break;
+    }
+
+    return(return_string);
+}
+
+QString Parser::ToQStrMoh( std::vector<DataSet::Test>::iterator itr_test )
+{
+    QString return_string = " ";
+    DataSet::Test current_test = Data->GetTest( itr_test);
+
+    switch (current_test.TestProp.PropMoh){
+        case DataSet::Value_3:
+            return_string = "Moh 3";
+            break;
+        case DataSet::Value_4:
+            return_string = "Moh 4";
+            break;
+        case DataSet::Value_5:
+            return_string = "Moh 5";
+            break;
+        case DataSet::Value_6:
+            return_string = "Moh 6";
+            break;
+        case DataSet::Value_7:
+            return_string = "Moh 7";
+            break;
+    }
+    return(return_string);
+}
+
+QString Parser::ToQStrPower( std::vector<DataSet::Test>::iterator itr_test )
+{
+    QString return_string = " ";
+    DataSet::Test current_test = Data->GetTest( itr_test);
+
+    switch (current_test.TestProp.PropPower){
+        case DataSet::Std_Power:
+            return_string = "Standard Power";
+            break;
+        case DataSet::Low_Power:
+            return_string = "Low Power";
+            break;
+        case DataSet::High_Power:
+            return_string = "High Performance";
+            break;
+    }
+    return(return_string);
+}
+
+QString Parser::ToQStrUnits( std::vector<DataSet::Test>::iterator itr_test )
+{
+    QString return_string = " ";
+    DataSet::Test current_test = Data->GetTest( itr_test);
+
+    switch (current_test.TestProp.PropUnits){
+        case DataSet::MPA:
+            return_string = "MPA";
+            break;
+        case DataSet::PSI:
+            return_string = "PSI";
+            break;
+    }
+    return(return_string);
+}
+
+QString Parser::ToQStrWeight( std::vector<DataSet::Test>::iterator itr_test )
+{
+    QString return_string = " ";
+    DataSet::Test current_test = Data->GetTest( itr_test);
+
+    switch (current_test.TestProp.PropWeight){
+        case DataSet::High_Weight:
+            return_string = "High Density";
+            break;
+        case DataSet::Med_Weight:
+            return_string = "Medium Density";
+            break;
+        case DataSet::Low_Weight:
+            return_string = "Low Density";
+            break;
+        case DataSet::Very_Low_Weight:
+            return_string = "Very Low Density";
+            break;
+    }
+
+    return(return_string);
+}
