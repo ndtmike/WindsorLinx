@@ -67,7 +67,7 @@
 #include "splash.h"
 
 
-#define TEST_REG
+//#define TEST_REG
 
 
 QT_BEGIN_NAMESPACE
@@ -101,6 +101,7 @@ private slots:
     void help();
     void lngDeutche();
     void lngEspanol();
+    void loadExampleFile();
     void openFile();
     void openSerialPort();
     void processSerialPort();
@@ -121,7 +122,7 @@ private:
 
     bool checkSerialPort();
     void initActionsConnections();
-    QString resultsFormat( Parser &r/*qint64 i*/, std::vector<DataSet::Test>::iterator itr);
+    QString resultsFormat( Parser &r, std::vector<DataSet::Test>::iterator itr);
     bool saveFile(const QString &fileName);
 
     static const QString helpString(void){ return("hh.exe aggralinx.chm");};

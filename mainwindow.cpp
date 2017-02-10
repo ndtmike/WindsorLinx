@@ -76,12 +76,10 @@ MainWindow::MainWindow(QWidget *parent) :
     init_timer->singleShot(100, this, SLOT(showSplash()));
 #else
     QTimer* init_timer = new QTimer(this);
-    init_timer->singleShot(100, this, SLOT(loadExampleFile()));
+    init_timer->singleShot(20, this, SLOT(loadExampleFile()));
 #endif
 #endif
     connectTimer = new QTimer(this);
-//    connect(connectTimer,SIGNAL(timeout()), this,SLOT(sendConnect()));
-
 }
 
 MainWindow::~MainWindow()
@@ -147,11 +145,7 @@ bool MainWindow::checkSerialPort()
     return(r);
 }
 
-void MainWindow::copy()
-{
-    console->selectAll();
-    console->copy();
-}
+
 
 void MainWindow::cleanData()//main function that takes raw data and transforms to usable
 {
@@ -163,7 +157,7 @@ void MainWindow::cleanData()//main function that takes raw data and transforms t
     qint64 i = 0;
     for( std::vector<DataSet::Test>::iterator itr = p.Data->GetBeginItr(); itr != p.Data->GetEndItr();++i, ++itr){
         display << tr("Test Number: ")<< i+1 <<'\n'
-//                << p.Data[i].TestDateTime.toString("MM/dd/yyyy hh:mm") <<'\n'
+                << p.ToQDateTime(itr).toString("MM/dd/yyyy hh:mm") <<'\n'
                 << tr("Power: ") << p.ToQStrPower(itr) << '\t'
                 << tr("Density: ") << p.ToQStrDensity(itr) << '\n'
                 << tr("Moh: ") << p.ToQStrMoh( itr ) << '\t'
@@ -174,6 +168,12 @@ void MainWindow::cleanData()//main function that takes raw data and transforms t
     }
     console->setPlainText( buffer );
     DataUpload = true;
+}
+
+void MainWindow::copy()
+{
+    console->selectAll();
+    console->copy();
 }
 
 void MainWindow::closeSerialPort()
@@ -230,6 +230,18 @@ void MainWindow::lngEspanol()
 
 }
 
+void MainWindow::loadExampleFile()
+{
+    saveFileName = "C:/Users/Mike/Documents/Projects/Windsorlinx/Example File/Example1.txt";
+    QFile file(saveFileName);
+    file.open(QFile::ReadOnly | QFile::Text);
+    QTextStream load(&file);
+    QString buffer = load.readAll();
+    Data.append( buffer );
+    cleanData();
+    file.close();
+}
+
 void MainWindow::initActionsConnections()
 {
     ui->actionQuit->setEnabled(true);
@@ -267,7 +279,6 @@ void MainWindow::openFile()
         QApplication::restoreOverrideCursor();
 #endif
         file.close();
-        //    ui->action_Save->setEnabled(true);
         ui->actionSaveAs->setEnabled(true);
         ui->action_Open->setEnabled(false);
         ui->actionPlot->setEnabled(true);
