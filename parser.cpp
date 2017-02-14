@@ -124,15 +124,16 @@ tm Parser::QBAtoDateTime(QByteArray &in)
     month += (in[3]) & 0x0f;
     return_tm.tm_mon = month;
     day = (((in[2])>>4) & 0x07)*10;
-    day += (in[2]) & 0x0f;      //BCD for Minutes
-    return_tm.tm_mday;
-    year = (((in[4])>>4) & 0x0F)*10;     //BCD for Minutes tens place
+    day += (in[2]) & 0x0f;      //BCD for Day
+    return_tm.tm_mday = day;
+    year = (((in[4])>>4) & 0x0F)*10;     //BCD for Year tens place
     year += (in[4]) & 0x0f;      //BCD for Minutes
     year = year>50 ? year+1900 : year+2000;
     return_tm.tm_year = year - 1900;
     hour =(((in[1])>>4) & 0x01)* 10; // BCD for Hours tens place
     hour += (in[1])& 0x0f ;  //BCD for Hours
-    hour = ((in[1]) & 0x20) > 0 ? hour + 12: hour;
+    hour = ((in[1]) & 0x20) > 0 ? hour + 12 : hour ;
+    hour =  hour > 23 ? 0 : hour ; //no 24 in 24 hour clock
     return_tm.tm_hour = hour;
     minute = (((in[0])>>4) & 0x07)*10;     //BCD for Minutes tens place
     minute += (in[0]) & 0x0f;      //BCD for Minutes
@@ -175,9 +176,7 @@ DataSet::Units Parser::QBAtoUnits(QByteArray &in)
 
 std::vector<long> Parser::QBAtoVectorADC(QByteArray &in)
 {
-    QByteArray /*qba_adczero, qba_adcfull,
-            qba_data0, qba_data1, qba_data2,*/
-            qba_working;
+    QByteArray qba_working;
     long adc_working;
     std::vector<long> return_vector;
 
@@ -219,8 +218,8 @@ QDateTime Parser::ToQDateTime(std::vector<DataSet::Test>::iterator itr_test)
 
     DataSet::Test current_test = Data->GetTest( itr_test );
     test_time = current_test.TestTime;
-    return_time.setDate( QDate( test_time.tm_year + 1900, test_time.tm_mon + 1, test_time.tm_mday ) );
-    return_time.setTime( QTime( test_time.tm_hour, test_time.tm_min, test_time.tm_sec ) );
+    return_time.setDate( QDate( test_time.tm_year + 1900, test_time.tm_mon , test_time.tm_mday ) );
+    return_time.setTime( QTime( test_time.tm_hour, test_time.tm_min ) );
 
     return(return_time);
 }

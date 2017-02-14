@@ -67,7 +67,7 @@
 #include "splash.h"
 
 
-//#define TEST_REG
+#define TEST_REG
 
 
 QT_BEGIN_NAMESPACE
