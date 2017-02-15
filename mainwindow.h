@@ -53,8 +53,10 @@
 #include <QTextStream>
 #include <QMessageBox>
 #include <QFileDialog>
+#include <QLocale>
 #include <QtSerialPort/QSerialPort>
 #include <QSerialPortInfo>
+#include <QTranslator>
 #include <QTimer>
 #include <QList>
 #include <QProcess>
@@ -87,6 +89,7 @@ class MainWindow : public QMainWindow
 public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
+    QLocale CurrentLocale;
     QString saveFileName;
 
 protected:
@@ -101,6 +104,8 @@ private slots:
     void help();
     void lngDeutche();
     void lngEspanol();
+    void LNGEnglish();
+    void LNGLoadTranslator();
     void loadExampleFile();
     void openFile();
     void openSerialPort();
@@ -118,6 +123,7 @@ private:
     bool foundSerialPort;
     QSerialPort *serial;
     QTimer *serialTimeOut;
+    QTranslator* Translator;
     Ui::MainWindow *ui;
 
     bool checkSerialPort();

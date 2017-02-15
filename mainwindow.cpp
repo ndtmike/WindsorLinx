@@ -113,6 +113,13 @@ bool MainWindow::checkSerialPort()
     QString description;
     QString manufacturer;
     QString portname;
+
+    CurrentLocale = QLocale::system(); //standardized number strings
+    QString systemlocale = CurrentLocale.name();
+    CurrentLocale = QLocale(systemlocale);
+    QLocale::setDefault(CurrentLocale);
+    Translator = new QTranslator(this);
+
     const QString portmanufacturer = "FTDI";
     const QString noport = tr("No Available Ports"
                               "\nCheck instrument is plugged in"
@@ -221,17 +228,47 @@ void MainWindow::help()
     QProcess* help = new QProcess(this);
     help->start("hh.exe Windsorlinx.chm");
 }
-
+/*
+ * sets translator object to German
+ */
 void MainWindow::lngDeutche()
 {
-
+    CurrentLocale = QLocale(QLocale::German);
+    QLocale::setDefault(CurrentLocale);
+    LNGLoadTranslator();
 }
-
+/*
+ * sets translator object to English
+ */
+void MainWindow::LNGEnglish()
+{
+    CurrentLocale = QLocale(QLocale::English);
+    QLocale::setDefault(CurrentLocale);
+    LNGLoadTranslator();
+}
+/*
+ * sets translator object to Spanish
+ */
 void MainWindow::lngEspanol()
 {
-
+    CurrentLocale = QLocale(QLocale::Spanish);
+    QLocale::setDefault(CurrentLocale);
+    LNGLoadTranslator();
 }
-
+/*
+ *loads translator  object
+*/
+void MainWindow::LNGLoadTranslator()
+{
+    if(Translator->isEmpty()){
+            Translator->load(CurrentLocale.language(), "Internationalization","_");
+            qApp->installTranslator(Translator);
+    }else{
+        qApp->removeTranslator(Translator);
+        Translator->load(CurrentLocale.language(), "Internationalization","_");
+        qApp->installTranslator(Translator);
+    }
+}
 void MainWindow::loadExampleFile()
 {
     saveFileName = "C:/Users/Mike/Documents/Projects/Windsorlinx/Example File/Example1.txt";
@@ -259,6 +296,7 @@ void MainWindow::initActionsConnections()
     connect(ui->action_Open, SIGNAL(triggered()), this, SLOT(openFile()));
     connect(ui->actionPlot, SIGNAL(triggered()), this, SLOT(cleanData()));
     connect(ui->actionDeutche, SIGNAL(triggered()), this, SLOT(lngDeutche()));
+    connect(ui->actionEnglish, SIGNAL(triggered()), this, SLOT(LNGEnglish()));
     connect(ui->actionEspanol, SIGNAL(triggered()), this, SLOT(lngEspanol()));
 }
 
